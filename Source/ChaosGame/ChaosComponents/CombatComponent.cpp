@@ -5,6 +5,7 @@
 #include "ChaosGame/Weapon/Weapon.h"
 #include "ChaosGame/Character/ChaosCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Components/SphereComponent.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -41,7 +42,5 @@ void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 	}
 
 	equippedWeapon->SetOwner(character); //character now is owner of weapon class as we atached and equipped
-	equippedWeapon->showPickupWidget(false); //set widget to false since now equipped
-
 }
 

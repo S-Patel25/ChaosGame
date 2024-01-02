@@ -72,6 +72,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UCombatComponent* combat;
 
+	UFUNCTION(Server, Reliable) //reliable means function will and needs be guarnteed on the remote machine (use sparingly)
+	void ServerEquipButtonPressed(); //Using RPC (remote procedure calls to handle server and client behaviour, designed on one machine, executed on another
+
 public:
 
 	void SetOverlappingWeapon(AWeapon* weapon);

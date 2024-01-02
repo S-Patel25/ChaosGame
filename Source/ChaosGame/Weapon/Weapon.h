@@ -25,6 +25,9 @@ class CHAOSGAME_API AWeapon : public AActor
 public:	
 	AWeapon();
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void showPickupWidget(bool bShowWidget);
 
 protected:
@@ -55,14 +58,17 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapons")
 	class USphereComponent* areaSphere; //for equipping
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere) //using rep notify for enum since it will be used extensivly
 	EWeaponState weaponState;
+
+	UFUNCTION()
+	void OnRep_WeaponState();
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapons")
 	class UWidgetComponent* pickupWidget;
 
 public:	
 	
-	FORCEINLINE void SetWeaponState(EWeaponState state) { weaponState = state; } //since enum is priv
-
+	void SetWeaponState(EWeaponState state); //since enum is priv
+	FORCEINLINE USphereComponent* getAreaSphere() const { return areaSphere;  }
 };

@@ -5,7 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "ChaosGame/Character/ChaosCharacter.h"
-
+#include "Net/UnrealNetwork.h"
 
 
 AWeapon::AWeapon()
@@ -57,6 +57,15 @@ void AWeapon::Tick(float DeltaTime)
 
 }
 
+void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AWeapon, weaponState);
+
+
+}
+
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AChaosCharacter* chaosCharacter = Cast<AChaosCharacter>(OtherActor);
@@ -76,6 +85,31 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	if (chaosCharacter) //if cast is successful
 	{
 		chaosCharacter->SetOverlappingWeapon(nullptr); //set to null once done overlap
+	}
+
+}
+
+void AWeapon::SetWeaponState(EWeaponState state) //weapon properties setter
+{
+	weaponState = state;
+
+	switch (weaponState)
+	{
+	case EWeaponState::EWS_Equipped: //use switch to set diff properties on the enum states
+		showPickupWidget(false); //set widget to false since now equipped
+		getAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision); //no overlap events after equip
+		break;
+	}
+}
+
+void AWeapon::OnRep_WeaponState()
+{
+	switch (weaponState)
+	{
+	case EWeaponState::EWS_Equipped: //use switch to set diff properties on the enum states
+		showPickupWidget(false);
+		areaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision); //so overlap events dont happen after weapon has been equipped
+		break;
 	}
 
 }

@@ -96,9 +96,16 @@ void AChaosCharacter::Look(const FInputActionValue& Value)
 
 void AChaosCharacter::Equip()
 {
-	if (combat && HasAuthority())
+	if (combat)
 	{
-		combat->equipWeapon(overlappingWeapon); //call equip only if valid and has authority (server)
+		if (HasAuthority())
+		{
+			combat->equipWeapon(overlappingWeapon); //call equip only if valid and has authority (server)
+		}
+		else
+		{
+			ServerEquipButtonPressed(); //now rpc is called if player is a client, (implementation keyword only needed for function definition)
+		}
 	}
 }
 
@@ -120,11 +127,19 @@ void AChaosCharacter::OnRep_overlappingWeapon(AWeapon* lastWeapon)
 	}
 }
 
+void AChaosCharacter::ServerEquipButtonPressed_Implementation() //need to add the implementation for RPC
+{
+	if (combat)
+	{
+		combat->equipWeapon(overlappingWeapon); //call equip only if valid and has authority (server)
+	}
+}
+
 void AChaosCharacter::SetOverlappingWeapon(AWeapon* weapon)
 {
 	if (overlappingWeapon)
 	{
-		overlappingWeapon->showPickupWidget(true); //call this before setting to make sure server player has correct behaviour
+		overlappingWeapon->showPickupWidget(false); //call this before setting to make sure server player has correct behaviour
 	}
 
 	overlappingWeapon = weapon;
