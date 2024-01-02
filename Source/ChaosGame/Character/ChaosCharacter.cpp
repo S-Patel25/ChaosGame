@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
 #include "ChaosGame/Weapon/Weapon.h"
+#include "ChaosGame/ChaosComponents/CombatComponent.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -32,6 +33,9 @@ AChaosCharacter::AChaosCharacter()
 
 	overheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	overheadWidget->SetupAttachment(RootComponent);
+
+	combat = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat Component"));
+	combat->SetIsReplicated(true); //make sure to add
 }
 
 void AChaosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -39,6 +43,17 @@ void AChaosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps); //make sure to always call super
 
 	DOREPLIFETIME_CONDITION(AChaosCharacter, overlappingWeapon, COND_OwnerOnly); //macro for replication with a condition (owner only means for pawn specific, so only player who interacts will be affected)
+
+}
+
+void AChaosCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (combat)
+	{
+		combat->character = this; //setting
+	}
 
 }
 
@@ -77,6 +92,14 @@ void AChaosCharacter::Look(const FInputActionValue& Value)
 
 	AddControllerPitchInput(lookVector.Y);
 	AddControllerYawInput(lookVector.X); //using pitch and yaw for mouse movement
+}
+
+void AChaosCharacter::Equip()
+{
+	if (combat && HasAuthority())
+	{
+		combat->equipWeapon(overlappingWeapon); //call equip only if valid and has authority (server)
+	}
 }
 
 void AChaosCharacter::Tick(float DeltaTime)
@@ -125,5 +148,6 @@ void AChaosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		enhancedInput->BindAction(movementAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Movement);
 		enhancedInput->BindAction(lookAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Look);
 		enhancedInput->BindAction(jumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		enhancedInput->BindAction(equipAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Equip);
 	}
 }

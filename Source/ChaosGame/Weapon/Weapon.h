@@ -63,5 +63,6 @@ private:
 
 public:	
 	
+	FORCEINLINE void SetWeaponState(EWeaponState state) { weaponState = state; } //since enum is priv
 
 };

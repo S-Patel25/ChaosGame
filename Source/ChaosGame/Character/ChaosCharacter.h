@@ -26,6 +26,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override; //function override to keep track of replicated variables
+	virtual void PostInitializeComponents() override;
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -44,8 +46,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* jumpAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* equipAction;
+
 	void Movement(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Equip(); //just a key press so no need for the value var
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -60,10 +66,12 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_overlappingWeapon) //new specifier to make sure var is replicated
 	class AWeapon* overlappingWeapon;
 
-
 	UFUNCTION()
 	void OnRep_overlappingWeapon(AWeapon* lastWeapon); //rep notifies (only get called from server to client, show changges wont show on server)
 	
+	UPROPERTY(VisibleAnywhere)
+	class UCombatComponent* combat;
+
 public:
 
 	void SetOverlappingWeapon(AWeapon* weapon);
