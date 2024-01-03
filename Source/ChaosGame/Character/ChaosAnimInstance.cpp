@@ -36,5 +36,5 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsAccelerating = chaosCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false; //use ternary to see if accelerating
 
 	bWeaponEquipped = chaosCharacter->isWeaponEquipped(); //so we can change animation pose
-
+	bIsCrouched = chaosCharacter->bIsCrouched;
 }

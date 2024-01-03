@@ -49,9 +49,15 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* equipAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* crouchAction;
+
+
+	//enhanced input stuff
 	void Movement(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Equip(); //just a key press so no need for the value var
+	void CrouchPressed();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)

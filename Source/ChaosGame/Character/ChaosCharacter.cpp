@@ -36,6 +36,8 @@ AChaosCharacter::AChaosCharacter()
 
 	combat = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat Component"));
 	combat->SetIsReplicated(true); //make sure to add
+
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true; //setting this on c++ code aswell as BP's
 }
 
 void AChaosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -108,6 +110,19 @@ void AChaosCharacter::Equip()
 	}
 }
 
+void AChaosCharacter::CrouchPressed()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Crouch(); //using inhertied methods from char movement component for crouching
+	}
+	
+}
+
 
 void AChaosCharacter::Tick(float DeltaTime)
 {
@@ -164,6 +179,7 @@ void AChaosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		enhancedInput->BindAction(lookAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Look);
 		enhancedInput->BindAction(jumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		enhancedInput->BindAction(equipAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Equip);
+		enhancedInput->BindAction(crouchAction, ETriggerEvent::Triggered, this, &AChaosCharacter::CrouchPressed);
 	}
 }
 
