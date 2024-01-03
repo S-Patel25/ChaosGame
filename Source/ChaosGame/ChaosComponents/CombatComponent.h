@@ -16,21 +16,21 @@ class CHAOSGAME_API UCombatComponent : public UActorComponent
 public:	
 	UCombatComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	friend class AChaosCharacter; //since this and char class depend on each other alot
+	friend class AChaosCharacter;
 
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void equipWeapon(AWeapon* weaponToEquip);
 
 protected:
 	virtual void BeginPlay() override;
 
-
 private:
 
-	class AChaosCharacter* character;
+	class AChaosCharacter* chaosCharacter;
+	UPROPERTY(Replicated) //needs to be replicated so animations can be seen on client aswell as server
 	AWeapon* equippedWeapon;
 
 public:	
 	
-
-		
 };

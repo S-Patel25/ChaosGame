@@ -52,11 +52,10 @@ void AChaosCharacter::PostInitializeComponents()
 
 	if (combat)
 	{
-		combat->character = this; //setting
+		combat->chaosCharacter = this;
 	}
 
 }
-
 
 void AChaosCharacter::BeginPlay()
 {
@@ -108,6 +107,7 @@ void AChaosCharacter::Equip()
 		}
 	}
 }
+
 
 void AChaosCharacter::Tick(float DeltaTime)
 {
@@ -165,4 +165,9 @@ void AChaosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		enhancedInput->BindAction(jumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		enhancedInput->BindAction(equipAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Equip);
 	}
+}
+
+bool AChaosCharacter::isWeaponEquipped()
+{
+	return (combat && combat->equippedWeapon);
 }

@@ -6,6 +6,7 @@
 #include "ChaosGame/Character/ChaosCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Components/SphereComponent.h"
+#include "Net/UnrealNetwork.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -26,21 +27,28 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UCombatComponent, equippedWeapon); //replicate weapon
+
+}
+
 void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 {
-	if (character == nullptr || weaponToEquip == nullptr) return; //check first
+	if (chaosCharacter == nullptr || weaponToEquip == nullptr) return; //check first
 	
 	equippedWeapon = weaponToEquip;
 
 	equippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped); //remember to update enum states
 
-	const USkeletalMeshSocket* handSocket = character->GetMesh()->GetSocketByName(FName("RightHandSocket")); //get the socket
+	const USkeletalMeshSocket* handSocket = chaosCharacter->GetMesh()->GetSocketByName(FName("RightHandSocket")); //get the socket
 
 	if (handSocket)
 	{
-		handSocket->AttachActor(equippedWeapon, character->GetMesh()); //attaches actor to the character
+		handSocket->AttachActor(equippedWeapon, chaosCharacter->GetMesh()); //attaches actor to the character
 	}
 
-	equippedWeapon->SetOwner(character); //character now is owner of weapon class as we atached and equipped
+	equippedWeapon->SetOwner(chaosCharacter); //character now is owner of weapon class as we atached and equipped
 }
 
