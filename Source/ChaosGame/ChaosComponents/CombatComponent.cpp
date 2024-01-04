@@ -13,17 +13,31 @@ UCombatComponent::UCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
+	baseWalkSpeed = 600.f;
+	aimWalkSpeed = 450.f;
+
 }
 
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (chaosCharacter)
+	{
+		chaosCharacter->GetCharacterMovement()->MaxWalkSpeed = baseWalkSpeed;
+	}
 }
 
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming); //this will make sure client gets replication properly for aiming
+
+	if (chaosCharacter)
+	{
+		chaosCharacter->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? aimWalkSpeed : baseWalkSpeed; //using ternary to easily check if aiming or not to update movement speed
+	}
+
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
@@ -39,6 +53,11 @@ void UCombatComponent::OnRep_EquippedWeapon()
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 {
 	bAiming = bIsAiming;
+
+	if (chaosCharacter)
+	{
+		chaosCharacter->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? aimWalkSpeed : baseWalkSpeed; //using ternary to easily check if aiming or not to update movement speed
+	}
 }
 
 

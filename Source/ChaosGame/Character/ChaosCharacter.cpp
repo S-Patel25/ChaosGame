@@ -11,6 +11,7 @@
 #include "Components/WidgetComponent.h"
 #include "ChaosGame/Weapon/Weapon.h"
 #include "ChaosGame/ChaosComponents/CombatComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -38,6 +39,9 @@ AChaosCharacter::AChaosCharacter()
 	combat->SetIsReplicated(true); //make sure to add
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true; //setting this on c++ code aswell as BP's
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 void AChaosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
