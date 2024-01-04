@@ -7,6 +7,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -23,6 +24,16 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 {
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming); //this will make sure client gets replication properly for aiming
+}
+
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	if (equippedWeapon && chaosCharacter)
+	{
+		chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+		chaosCharacter->bUseControllerRotationYaw = true;
+	}
+	
 }
 
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
@@ -61,5 +72,8 @@ void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 	}
 
 	equippedWeapon->SetOwner(chaosCharacter); //character now is owner of weapon class as we atached and equipped
+
+	chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+	chaosCharacter->bUseControllerRotationYaw = true; //set in server, make sure to use rep notify for client aswell
 }
 

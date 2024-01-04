@@ -4,6 +4,7 @@
 #include "ChaosAnimInstance.h"
 #include "ChaosCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UChaosAnimInstance::NativeInitializeAnimation()
 {
@@ -38,4 +39,22 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bWeaponEquipped = chaosCharacter->isWeaponEquipped(); //so we can change animation pose
 	bIsCrouched = chaosCharacter->bIsCrouched;
 	bAiming = chaosCharacter->isAiming();
-}
+
+
+	//yaw offset strafing
+	FRotator aimRotation = chaosCharacter->GetBaseAimRotation(); //keep track of aim rotation so we can change yaw and lean
+	FRotator movementRotation = UKismetMathLibrary::MakeRotFromX(chaosCharacter->GetVelocity()); //based on where character is moving
+	FRotator deltaRot = UKismetMathLibrary::NormalizedDeltaRotator(movementRotation, aimRotation); //used for smooth interp
+	deltaRotation = FMath::RInterpTo(deltaRotation, deltaRot, DeltaTime, 6.f); //better then using blendspace interp as it causes jerk behaviour
+	yawOffset = deltaRotation.Yaw; //will make it smooth as RInterp takes shortest path
+	
+	//lean
+	characterRotationLastFrame = characterRotation;
+	characterRotation = chaosCharacter->GetActorRotation();
+
+	const FRotator delta = UKismetMathLibrary::NormalizedDeltaRotator(characterRotation, characterRotationLastFrame); //get delta
+	const float target = delta.Yaw / DeltaTime;
+	const float interp = FMath::FInterpTo(lean, target, DeltaTime, 6.f); //to avoid jerkiness when leaning
+	lean = FMath::Clamp(interp, -90.f, 90.f); //clamp so it doesn't go beyond and create weird behaviour
+
+};

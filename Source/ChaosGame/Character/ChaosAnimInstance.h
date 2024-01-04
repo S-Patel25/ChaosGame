@@ -40,4 +40,17 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bAiming;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float yawOffset; //yaw and lean to help animate leaning and strafing
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float lean;
+
+	FRotator characterRotationLastFrame;
+	FRotator characterRotation; //this is for calculating lean
+
+	FRotator deltaRotation; 
+
+
 };

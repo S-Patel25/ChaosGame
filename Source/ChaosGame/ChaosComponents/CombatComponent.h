@@ -29,12 +29,14 @@ protected:
 	UFUNCTION(Server, Reliable) //reliable since aiming is very important
 	void ServerSetAiming(bool bIsAiming); //making a RPC so client has aiming working properly
 
+	UFUNCTION()
+	void OnRep_EquippedWeapon();
 
 private:
 
 	class AChaosCharacter* chaosCharacter;
 
-	UPROPERTY(Replicated) //needs to be replicated so animations can be seen on client aswell as server
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon) //needs to be replicated so animations can be seen on client aswell as server
 	AWeapon* equippedWeapon;
 
 	UPROPERTY(Replicated)
