@@ -57,4 +57,6 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	const float interp = FMath::FInterpTo(lean, target, DeltaTime, 6.f); //to avoid jerkiness when leaning
 	lean = FMath::Clamp(interp, -90.f, 90.f); //clamp so it doesn't go beyond and create weird behaviour
 
+	AO_Yaw = chaosCharacter->GetAO_Yaw();
+	AO_Pitch = chaosCharacter->GetAO_Pitch();
 };

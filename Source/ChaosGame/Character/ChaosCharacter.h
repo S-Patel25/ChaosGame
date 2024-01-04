@@ -63,6 +63,7 @@ protected:
 	void CrouchPressed();
 	void AimPressed();
 	void AimReleased();
+	void AimOffset(float DeltaTime);
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -86,9 +87,15 @@ private:
 	UFUNCTION(Server, Reliable) //reliable means function will and needs be guarnteed on the remote machine (use sparingly)
 	void ServerEquipButtonPressed(); //Using RPC (remote procedure calls to handle server and client behaviour, designed on one machine, executed on another
 
+	float AO_Yaw;
+	float AO_Pitch;
+	FRotator startingAimRotation;
+
 public:
 
 	void SetOverlappingWeapon(AWeapon* weapon);
 	bool isWeaponEquipped();
 	bool isAiming();
+	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
+	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch;  }
 };

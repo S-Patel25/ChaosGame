@@ -12,6 +12,7 @@
 #include "ChaosGame/Weapon/Weapon.h"
 #include "ChaosGame/ChaosComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -144,10 +145,50 @@ void AChaosCharacter::AimReleased()
 	}
 }
 
+void AChaosCharacter::AimOffset(float DeltaTime)
+{
+	if (combat && combat->equippedWeapon == nullptr) return; //leave function early if no weapon equipped
+
+	FVector velocity = GetVelocity(); //getting speed var from velocity
+	velocity.Z = 0.f;
+	float speed = velocity.Size();
+
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	if (speed == 0.f && !bIsInAir) //standing still and not jumping
+	{
+		FRotator currentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		FRotator deltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(currentAimRotation, startingAimRotation);
+		AO_Yaw = deltaAimRotation.Yaw;
+		bUseControllerRotationYaw = false; //so offset calculations work properly (when standing still)
+
+
+		if (speed > 0.f || bIsInAir) //running or jumping
+		{
+			startingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); //storing the yaw so we can correctly apply offset
+			AO_Yaw = 0.f;
+			bUseControllerRotationYaw = true;
+		}
+
+		AO_Pitch = GetBaseAimRotation().Pitch; //much easier however pitch is changed when sent across network (compressed and positive) so we have to account for that
+
+		if (AO_Pitch > 90.f && !IsLocallyControlled()) //do correction when pitch > 90 degrees
+		{
+			// map pitch from [270, 360) to [-90, 0) so correct behvaiour is seen in multiplayer
+
+			FVector2D inRange(270.f, 360.f);
+			FVector2D outRange(-90.f, 0.f);
+			AO_Pitch = FMath::GetMappedRangeValueClamped(inRange, outRange, AO_Pitch); //handy function to map for us
+		}
+	}
+
+}
+
 
 void AChaosCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	AimOffset(DeltaTime); //every tick
 }
 
 
