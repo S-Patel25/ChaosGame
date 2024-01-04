@@ -123,6 +123,23 @@ void AChaosCharacter::CrouchPressed()
 	
 }
 
+void AChaosCharacter::AimPressed()
+{
+	if (combat)
+	{
+		combat->SetAiming(true);
+	}
+
+}
+
+void AChaosCharacter::AimReleased()
+{
+	if (combat)
+	{
+		combat->SetAiming(false);
+	}
+}
+
 
 void AChaosCharacter::Tick(float DeltaTime)
 {
@@ -180,10 +197,17 @@ void AChaosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		enhancedInput->BindAction(jumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		enhancedInput->BindAction(equipAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Equip);
 		enhancedInput->BindAction(crouchAction, ETriggerEvent::Triggered, this, &AChaosCharacter::CrouchPressed);
+		enhancedInput->BindAction(aimAction, ETriggerEvent::Started, this, &AChaosCharacter::AimPressed); //started and complete is same as pressed and released from old input system
+		enhancedInput->BindAction(aimAction, ETriggerEvent::Completed, this, &AChaosCharacter::AimReleased);
 	}
 }
 
 bool AChaosCharacter::isWeaponEquipped()
 {
 	return (combat && combat->equippedWeapon);
+}
+
+bool AChaosCharacter::isAiming()
+{
+	return (combat && combat->bAiming);
 }

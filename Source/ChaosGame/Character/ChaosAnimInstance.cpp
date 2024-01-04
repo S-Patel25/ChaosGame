@@ -37,4 +37,5 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	bWeaponEquipped = chaosCharacter->isWeaponEquipped(); //so we can change animation pose
 	bIsCrouched = chaosCharacter->bIsCrouched;
+	bAiming = chaosCharacter->isAiming();
 }

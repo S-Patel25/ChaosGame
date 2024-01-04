@@ -51,6 +51,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* crouchAction;
+	
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* aimAction;
 
 
 	//enhanced input stuff
@@ -58,6 +61,8 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Equip(); //just a key press so no need for the value var
 	void CrouchPressed();
+	void AimPressed();
+	void AimReleased();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -85,4 +90,5 @@ public:
 
 	void SetOverlappingWeapon(AWeapon* weapon);
 	bool isWeaponEquipped();
+	bool isAiming();
 };

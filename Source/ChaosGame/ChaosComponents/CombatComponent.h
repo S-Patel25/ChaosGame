@@ -24,12 +24,21 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void SetAiming(bool bIsAiming);
+
+	UFUNCTION(Server, Reliable) //reliable since aiming is very important
+	void ServerSetAiming(bool bIsAiming); //making a RPC so client has aiming working properly
+
 
 private:
 
 	class AChaosCharacter* chaosCharacter;
+
 	UPROPERTY(Replicated) //needs to be replicated so animations can be seen on client aswell as server
 	AWeapon* equippedWeapon;
+
+	UPROPERTY(Replicated)
+	bool bAiming;
 
 public:	
 	
