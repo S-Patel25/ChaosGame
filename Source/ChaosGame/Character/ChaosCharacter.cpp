@@ -256,3 +256,10 @@ bool AChaosCharacter::isAiming()
 {
 	return (combat && combat->bAiming);
 }
+
+AWeapon* AChaosCharacter::GetEquippedWeapon()
+{
+	if(combat == nullptr) return nullptr;
+
+	return combat->equippedWeapon;
+}

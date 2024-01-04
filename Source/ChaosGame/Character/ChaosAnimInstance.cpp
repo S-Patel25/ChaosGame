@@ -5,6 +5,7 @@
 #include "ChaosCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "ChaosGame/Weapon/Weapon.h"
 
 void UChaosAnimInstance::NativeInitializeAnimation()
 {
@@ -37,6 +38,7 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsAccelerating = chaosCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false; //use ternary to see if accelerating
 
 	bWeaponEquipped = chaosCharacter->isWeaponEquipped(); //so we can change animation pose
+	equippedWeapon = chaosCharacter->GetEquippedWeapon();
 	bIsCrouched = chaosCharacter->bIsCrouched;
 	bAiming = chaosCharacter->isAiming();
 
@@ -59,4 +61,19 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	AO_Yaw = chaosCharacter->GetAO_Yaw();
 	AO_Pitch = chaosCharacter->GetAO_Pitch();
+
+	if (bWeaponEquipped && equippedWeapon && equippedWeapon->getWeaponMesh() && chaosCharacter->GetMesh())
+	{
+		leftHandTransform = equippedWeapon->getWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+
+		FVector outPosition;
+		FRotator outRotation;
+
+		//using transform bone space method to get left hand position in the correct spot
+		chaosCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), leftHandTransform.GetLocation(), FRotator::ZeroRotator, outPosition, outRotation);
+
+		leftHandTransform.SetLocation(outPosition);
+		leftHandTransform.SetRotation(FQuat(outRotation)); //using set location to align hand bone properly
+
+	}
 };

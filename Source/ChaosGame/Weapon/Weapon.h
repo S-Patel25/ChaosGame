@@ -71,4 +71,5 @@ public:
 	
 	void SetWeaponState(EWeaponState state); //since enum is priv
 	FORCEINLINE USphereComponent* getAreaSphere() const { return areaSphere;  }
+	FORCEINLINE USkeletalMeshComponent* getWeaponMesh() const { return weaponMesh; }
 };
