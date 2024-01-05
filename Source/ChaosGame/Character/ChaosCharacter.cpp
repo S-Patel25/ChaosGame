@@ -43,6 +43,9 @@ AChaosCharacter::AChaosCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	turningInPlace = ETurningInPlace::ETIP_NotTurning; //make sure no weird behaviour
+
 }
 
 void AChaosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -160,26 +163,32 @@ void AChaosCharacter::AimOffset(float DeltaTime)
 		FRotator currentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		FRotator deltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(currentAimRotation, startingAimRotation);
 		AO_Yaw = deltaAimRotation.Yaw;
-		bUseControllerRotationYaw = false; //so offset calculations work properly (when standing still)
-
-
-		if (speed > 0.f || bIsInAir) //running or jumping
+		if (turningInPlace == ETurningInPlace::ETIP_NotTurning)
 		{
-			startingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); //storing the yaw so we can correctly apply offset
-			AO_Yaw = 0.f;
-			bUseControllerRotationYaw = true;
+			interpAO_Yaw = AO_Yaw; //default
 		}
+		bUseControllerRotationYaw = true; //so offset calculations work properly (when standing still)
 
-		AO_Pitch = GetBaseAimRotation().Pitch; //much easier however pitch is changed when sent across network (compressed and positive) so we have to account for that
+		TurnInPlace(DeltaTime);
+	}
 
-		if (AO_Pitch > 90.f && !IsLocallyControlled()) //do correction when pitch > 90 degrees
-		{
-			// map pitch from [270, 360) to [-90, 0) so correct behvaiour is seen in multiplayer
+	if (speed > 0.f || bIsInAir) //running or jumping
+	{
+		startingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); //storing the yaw so we can correctly apply offset
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+		turningInPlace = ETurningInPlace::ETIP_NotTurning;
+	}
 
-			FVector2D inRange(270.f, 360.f);
-			FVector2D outRange(-90.f, 0.f);
-			AO_Pitch = FMath::GetMappedRangeValueClamped(inRange, outRange, AO_Pitch); //handy function to map for us
-		}
+	AO_Pitch = GetBaseAimRotation().Pitch; //much easier however pitch is changed when sent across network (compressed and positive) so we have to account for that
+
+	if (AO_Pitch > 90.f && !IsLocallyControlled()) //do correction when pitch > 90 degrees
+	{
+		// map pitch from [270, 360) to [-90, 0) so correct behvaiour is seen in multiplayer
+
+		FVector2D inRange(270.f, 360.f);
+		FVector2D outRange(-90.f, 0.f);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(inRange, outRange, AO_Pitch); //handy function to map for us
 	}
 
 }
@@ -209,6 +218,29 @@ void AChaosCharacter::ServerEquipButtonPressed_Implementation() //need to add th
 	if (combat)
 	{
 		combat->equipWeapon(overlappingWeapon); //call equip only if valid and has authority (server)
+	}
+}
+
+void AChaosCharacter::TurnInPlace(float DeltaTime)
+{
+	if (AO_Yaw > 90.f) //based on UE logs, char will turn based on yaw position
+	{
+		turningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	else if (AO_Yaw < -90.f)
+	{
+		turningInPlace = ETurningInPlace::ETIP_Left;
+	}
+	if (turningInPlace != ETurningInPlace::ETIP_NotTurning) //now we interp 
+	{
+		interpAO_Yaw = FMath::FInterpTo(interpAO_Yaw, 0.f, DeltaTime, 4.f);
+		AO_Yaw = interpAO_Yaw; //now our ao yaw will be interped to allow for correct root bone movement
+
+		if (FMath::Abs(AO_Yaw) < 15.f)
+		{
+			turningInPlace = ETurningInPlace::ETIP_NotTurning; //set it back once character position is back to not turning
+			startingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		}
 	}
 }
 

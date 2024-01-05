@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h" //we need this because we cannot forward declare a non-pointer variable
 #include "Net/UnrealNetwork.h"
+#include "ChaosGame/ChaosTypes/TurningInPlace.h"
 #include "ChaosCharacter.generated.h"
 
 
@@ -88,8 +89,12 @@ private:
 	void ServerEquipButtonPressed(); //Using RPC (remote procedure calls to handle server and client behaviour, designed on one machine, executed on another
 
 	float AO_Yaw;
+	float interpAO_Yaw; //for root bone turning
 	float AO_Pitch;
 	FRotator startingAimRotation;
+
+	ETurningInPlace turningInPlace;
+	void TurnInPlace(float DeltaTime);
 
 public:
 
@@ -99,4 +104,5 @@ public:
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch;  }
 	AWeapon* GetEquippedWeapon();
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return turningInPlace; }
 };	

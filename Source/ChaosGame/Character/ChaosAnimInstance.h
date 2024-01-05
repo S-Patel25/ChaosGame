@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "ChaosGame/ChaosTypes/TurningInPlace.h"
 #include "ChaosAnimInstance.generated.h"
 
 /**
@@ -65,5 +66,8 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	FTransform leftHandTransform; //using FABRIK IK for left hand placement
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	ETurningInPlace turningInPlace;
 
 };
