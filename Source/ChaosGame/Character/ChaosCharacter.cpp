@@ -46,6 +46,10 @@ AChaosCharacter::AChaosCharacter()
 
 	turningInPlace = ETurningInPlace::ETIP_NotTurning; //make sure no weird behaviour
 
+	NetUpdateFrequency = 66.f;
+	MinNetUpdateFrequency = 33.f; //how many times it will be replicated (66 and 33 are common used in fast paced shooter games)
+
+
 }
 
 void AChaosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
