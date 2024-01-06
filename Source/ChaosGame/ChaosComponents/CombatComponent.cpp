@@ -53,9 +53,22 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
 
+	if (bFireButtonPressed)
+	{
+		ServerFire(); //calling server RPC
+	}
+}
+
+void UCombatComponent::ServerFire_Implementation()
+{
+	MulticastFire(); //calling rom the server runs on server AND all clients
+}
+
+void UCombatComponent::MulticastFire_Implementation()
+{
 	if (equippedWeapon == nullptr) return;
 
-	if (chaosCharacter && bFireButtonPressed)
+	if (chaosCharacter)
 	{
 		chaosCharacter->playFireMontage(bAiming);
 		equippedWeapon->Fire();

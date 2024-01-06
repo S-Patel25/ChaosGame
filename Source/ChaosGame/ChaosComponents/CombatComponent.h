@@ -32,8 +32,13 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
-
 	void FireButtonPressed(bool bPressed);
+
+	UFUNCTION(Server, Reliable)
+	void ServerFire(); //RPC so fire effects can be seen
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastFire(); //multicast RPC, allows for ALL clients to get information
 
 private:
 
