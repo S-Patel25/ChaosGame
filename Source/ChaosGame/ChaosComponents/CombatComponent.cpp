@@ -8,10 +8,12 @@
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 UCombatComponent::UCombatComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	baseWalkSpeed = 600.f;
 	aimWalkSpeed = 450.f;
@@ -59,6 +61,58 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	}
 }
 
+void UCombatComponent::traceUnderCrosshairs(FHitResult& TraceHitResult)
+{
+	FVector2d viewportSize;
+
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(viewportSize); //getting viewport size to make the trace accurate
+	}
+
+	FVector2D crosshairLocation(viewportSize.X / 2, viewportSize.Y / 2.f); //this gets center of screen
+	
+	FVector crosshairWorldPosition;
+	FVector crosshairWorldDirection;
+
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld( //converts 2d space into 3D world space (so we have accurate location of the center)
+		UGameplayStatics::GetPlayerController(this, 0),
+		crosshairLocation,
+		crosshairWorldPosition,
+		crosshairWorldDirection
+	);
+
+	if (bScreenToWorld) //once we have center location relative to world, now we perform a line trace
+	{
+		FVector start = crosshairWorldPosition;
+		FVector end = start + crosshairWorldDirection * TRACE_LENGTH; //multiply by big val since its a world direction var is a unit vector (length 1)
+
+		GetWorld()->LineTraceSingleByChannel( //line trace on visibility channel
+			TraceHitResult,
+			start,
+			end,
+			ECollisionChannel::ECC_Visibility
+		);
+		if (!TraceHitResult.bBlockingHit) //if it doesnt hit something
+		{
+			TraceHitResult.ImpactPoint = end;
+			HitTarget = end;
+		}
+		else
+		{
+			HitTarget = TraceHitResult.ImpactPoint;
+			DrawDebugSphere( //to test and see line trace
+				GetWorld(),
+				TraceHitResult.ImpactPoint,
+				12.f,
+				12,
+				FColor::Red
+			);
+		}
+	}
+
+}
+
 void UCombatComponent::ServerFire_Implementation()
 {
 	MulticastFire(); //calling rom the server runs on server AND all clients
@@ -71,7 +125,7 @@ void UCombatComponent::MulticastFire_Implementation()
 	if (chaosCharacter)
 	{
 		chaosCharacter->playFireMontage(bAiming);
-		equippedWeapon->Fire();
+		equippedWeapon->Fire(HitTarget);
 	}
 }
 
@@ -90,7 +144,8 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	FHitResult hitResult;
+	traceUnderCrosshairs(hitResult);
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

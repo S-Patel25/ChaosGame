@@ -8,6 +8,8 @@
 
 class AWeapon;
 
+#define TRACE_LENGTH 80000 //for our line trace
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CHAOSGAME_API UCombatComponent : public UActorComponent
 {
@@ -40,6 +42,9 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastFire(); //multicast RPC, allows for ALL clients to get information
 
+	void traceUnderCrosshairs(FHitResult& TraceHitResult); //making a function for the hit target
+
+
 private:
 
 	class AChaosCharacter* chaosCharacter;
@@ -57,6 +62,8 @@ private:
 	float aimWalkSpeed;
 
 	bool bFireButtonPressed;
+
+	FVector HitTarget;
 
 public:	
 	

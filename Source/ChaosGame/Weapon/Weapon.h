@@ -30,7 +30,7 @@ public:
 
 	void showPickupWidget(bool bShowWidget);
 
-	void Fire();
+	virtual void Fire(const FVector& HitTarget); //reference is to avoid copy
 
 protected:
 	virtual void BeginPlay() override;
