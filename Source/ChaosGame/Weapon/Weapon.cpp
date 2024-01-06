@@ -6,6 +6,8 @@
 #include "Components/WidgetComponent.h"
 #include "ChaosGame/Character/ChaosCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/AnimationAsset.h"
+#include "Components/SkeletalMeshComponent.h"
 
 
 AWeapon::AWeapon()
@@ -119,6 +121,15 @@ void AWeapon::showPickupWidget(bool bShowWidget)
 	if (pickupWidget)
 	{
 		pickupWidget->SetVisibility(bShowWidget);
+	}
+
+}
+
+void AWeapon::Fire()
+{
+	if (fireAnimation)
+	{
+		weaponMesh->PlayAnimation(fireAnimation, false); //play anim
 	}
 
 }

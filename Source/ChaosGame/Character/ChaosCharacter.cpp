@@ -13,6 +13,7 @@
 #include "ChaosGame/ChaosComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "ChaosAnimInstance.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -70,6 +71,25 @@ void AChaosCharacter::PostInitializeComponents()
 	{
 		combat->chaosCharacter = this;
 	}
+
+}
+
+void AChaosCharacter::playFireMontage(bool bAiming)
+{
+	if (combat == nullptr || combat->equippedWeapon == nullptr) return;
+
+	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+
+	if (animInstance && fireWeaponMontage)
+	{
+		animInstance->Montage_Play(fireWeaponMontage); //play montage
+		FName sectionName;
+
+		sectionName = bAiming ? FName("RifleAim") : FName("RifleHip"); //play montage based on aiming or not
+
+		animInstance->Montage_JumpToSection(sectionName);
+	}
+
 
 }
 
@@ -151,6 +171,23 @@ void AChaosCharacter::AimReleased()
 	if (combat)
 	{
 		combat->SetAiming(false);
+	}
+}
+
+void AChaosCharacter::FirePressed()
+{
+	if (combat)
+	{
+		combat->FireButtonPressed(true);
+	}
+
+}
+
+void AChaosCharacter::FireReleased()
+{
+	if (combat)
+	{
+		combat->FireButtonPressed(false);
 	}
 }
 
@@ -297,6 +334,8 @@ void AChaosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		enhancedInput->BindAction(crouchAction, ETriggerEvent::Triggered, this, &AChaosCharacter::CrouchPressed);
 		enhancedInput->BindAction(aimAction, ETriggerEvent::Started, this, &AChaosCharacter::AimPressed); //started and complete is same as pressed and released from old input system
 		enhancedInput->BindAction(aimAction, ETriggerEvent::Completed, this, &AChaosCharacter::AimReleased);
+		enhancedInput->BindAction(fireAction, ETriggerEvent::Started, this, &AChaosCharacter::FirePressed);
+		enhancedInput->BindAction(fireAction, ETriggerEvent::Completed, this, &AChaosCharacter::FireReleased);
 	}
 }
 

@@ -30,6 +30,8 @@ public:
 
 	void showPickupWidget(bool bShowWidget);
 
+	void Fire();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -66,6 +68,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapons")
 	class UWidgetComponent* pickupWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	class UAnimationAsset* fireAnimation;
 
 public:	
 	

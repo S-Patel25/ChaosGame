@@ -47,7 +47,19 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 		chaosCharacter->bUseControllerRotationYaw = true;
 	}
-	
+}
+
+void UCombatComponent::FireButtonPressed(bool bPressed)
+{
+	bFireButtonPressed = bPressed;
+
+	if (equippedWeapon == nullptr) return;
+
+	if (chaosCharacter && bFireButtonPressed)
+	{
+		chaosCharacter->playFireMontage(bAiming);
+		equippedWeapon->Fire();
+	}
 }
 
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)

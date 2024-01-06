@@ -29,6 +29,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override; //function override to keep track of replicated variables
 	virtual void PostInitializeComponents() override;
 
+	void playFireMontage(bool bAiming);
 
 protected:
 	virtual void BeginPlay() override;
@@ -56,6 +57,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* aimAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* fireAction;
+
 
 	//enhanced input stuff
 	void Movement(const FInputActionValue& Value);
@@ -64,6 +68,8 @@ protected:
 	void CrouchPressed();
 	void AimPressed();
 	void AimReleased();
+	void FirePressed();
+	void FireReleased();
 
 
 	void AimOffset(float DeltaTime);
@@ -98,6 +104,10 @@ private:
 
 	ETurningInPlace turningInPlace;
 	void TurnInPlace(float DeltaTime);
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* fireWeaponMontage;
+
 
 public:
 
