@@ -43,6 +43,8 @@ AChaosCharacter::AChaosCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 850.f, 0.f);
+
 
 	turningInPlace = ETurningInPlace::ETIP_NotTurning; //make sure no weird behaviour
 
@@ -197,6 +199,21 @@ void AChaosCharacter::AimOffset(float DeltaTime)
 
 }
 
+void AChaosCharacter::Jump()
+{
+	if (bIsCrouched) //doing this so player can jump while crouching
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Super::Jump();
+	}
+
+
+
+}
+
 
 void AChaosCharacter::Tick(float DeltaTime)
 {
@@ -275,7 +292,7 @@ void AChaosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	{
 		enhancedInput->BindAction(movementAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Movement);
 		enhancedInput->BindAction(lookAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Look);
-		enhancedInput->BindAction(jumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		enhancedInput->BindAction(jumpAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Jump);
 		enhancedInput->BindAction(equipAction, ETriggerEvent::Triggered, this, &AChaosCharacter::Equip);
 		enhancedInput->BindAction(crouchAction, ETriggerEvent::Triggered, this, &AChaosCharacter::CrouchPressed);
 		enhancedInput->BindAction(aimAction, ETriggerEvent::Started, this, &AChaosCharacter::AimPressed); //started and complete is same as pressed and released from old input system
