@@ -37,10 +37,12 @@ protected:
 	void FireButtonPressed(bool bPressed);
 
 	UFUNCTION(Server, Reliable)
-	void ServerFire(); //RPC so fire effects can be seen
+	void ServerFire(const FVector_NetQuantize& TraceHitTarget); //RPC so fire effects can be seen
+	//net quantize sends info in a efficient matter (whole numbers, not rounded therefore is faster and less bandwidth taken)
+
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastFire(); //multicast RPC, allows for ALL clients to get information
+	void MulticastFire(const FVector_NetQuantize& TraceHitTarget); //multicast RPC, allows for ALL clients to get information
 
 	void traceUnderCrosshairs(FHitResult& TraceHitResult); //making a function for the hit target
 
@@ -62,8 +64,6 @@ private:
 	float aimWalkSpeed;
 
 	bool bFireButtonPressed;
-
-	FVector HitTarget;
 
 public:	
 	

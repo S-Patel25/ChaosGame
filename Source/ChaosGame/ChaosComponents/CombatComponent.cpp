@@ -57,7 +57,9 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 	if (bFireButtonPressed)
 	{
-		ServerFire(); //calling server RPC
+		FHitResult hitResult;
+		traceUnderCrosshairs(hitResult);
+		ServerFire(hitResult.ImpactPoint); //calling server RPC
 	}
 }
 
@@ -93,39 +95,23 @@ void UCombatComponent::traceUnderCrosshairs(FHitResult& TraceHitResult)
 			end,
 			ECollisionChannel::ECC_Visibility
 		);
-		if (!TraceHitResult.bBlockingHit) //if it doesnt hit something
-		{
-			TraceHitResult.ImpactPoint = end;
-			HitTarget = end;
-		}
-		else
-		{
-			HitTarget = TraceHitResult.ImpactPoint;
-			DrawDebugSphere( //to test and see line trace
-				GetWorld(),
-				TraceHitResult.ImpactPoint,
-				12.f,
-				12,
-				FColor::Red
-			);
-		}
 	}
 
 }
 
-void UCombatComponent::ServerFire_Implementation()
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-	MulticastFire(); //calling rom the server runs on server AND all clients
+	MulticastFire(TraceHitTarget); //calling rom the server runs on server AND all clients
 }
 
-void UCombatComponent::MulticastFire_Implementation()
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (equippedWeapon == nullptr) return;
 
 	if (chaosCharacter)
 	{
 		chaosCharacter->playFireMontage(bAiming);
-		equippedWeapon->Fire(HitTarget);
+		equippedWeapon->Fire(TraceHitTarget);
 	}
 }
 
@@ -144,8 +130,6 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FHitResult hitResult;
-	traceUnderCrosshairs(hitResult);
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
