@@ -23,6 +23,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* collisionBox;
 
+	UPROPERTY(VisibleAnywhere)
+	class UProjectileMovementComponent* projectileMovementComponent; //hand ue5 class that handles projectile movememnt (replicated)
+
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* tracer;
+
+	class UParticleSystemComponent* tracerComponent;
+
 public:	
 
 	

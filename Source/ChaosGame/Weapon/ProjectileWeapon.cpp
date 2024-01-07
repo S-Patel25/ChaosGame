@@ -8,6 +8,11 @@
 void AProjectileWeapon::Fire(const FVector& HitTarget)
 {
 	Super::Fire(HitTarget);
+
+	if (!HasAuthority()) return; //only server should handle this (to prevent cheating as clients can work around this)
+
+
+
 	APawn* instigatorPawn = Cast<APawn>(GetOwner()); //to satisfy spawn params
 
 	const USkeletalMeshSocket* muzzleFlashSocket = getWeaponMesh()->GetSocketByName(FName("MuzzleFlash")); //getting muzzle flash socket as that's where the projectile will spawn
