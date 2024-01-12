@@ -104,6 +104,11 @@ void UCombatComponent::traceUnderCrosshairs(FHitResult& TraceHitResult)
 			end,
 			ECollisionChannel::ECC_Visibility
 		);
+
+		if (!TraceHitResult.bBlockingHit)
+		{
+			TraceHitResult.ImpactPoint = end; //so there is always a valid target
+		}
 	}
 
 }
@@ -132,7 +137,7 @@ void UCombatComponent::setHUDCrosshairs(float DeltaTime)
 			}
 			else
 			{
-				HUDPackage.crosshairsCenter = nullptr;
+				HUDPackage.crosshairsCenter = nullptr; //set to null if not equipped
 				HUDPackage.crosshairsLeft = nullptr;
 				HUDPackage.crosshairsRight = nullptr;
 				HUDPackage.crosshairsBottom = nullptr;
@@ -203,6 +208,13 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	setHUDCrosshairs(DeltaTime);
+
+	if (chaosCharacter && chaosCharacter->IsLocallyControlled())
+	{
+		FHitResult hitResult;
+		traceUnderCrosshairs(hitResult);
+		hitTarget = hitResult.ImpactPoint;
+	}
 
 }
 

@@ -75,5 +75,16 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		leftHandTransform.SetLocation(outPosition);
 		leftHandTransform.SetRotation(FQuat(outRotation)); //using set location to align hand bone properly
 
+		if (chaosCharacter->IsLocallyControlled())
+		{
+			bLocallyControlled = true;
+			FTransform rightHandTransform = chaosCharacter->GetMesh()->GetSocketTransform(FName("hand_r"), ERelativeTransformSpace::RTS_World);
+			rightHandRotation = UKismetMathLibrary::FindLookAtRotation(rightHandTransform.GetLocation(), rightHandTransform.GetLocation() + (rightHandTransform.GetLocation() - chaosCharacter->getHitTarget())); //vector from transform to hit target (gives backward since hand_r x direction is opposite)
+
+			rightHandRotation.Roll += chaosCharacter->RightHandRotationRoll;
+			rightHandRotation.Pitch += chaosCharacter->RightHandRotationPitch;
+			rightHandRotation.Yaw += chaosCharacter->RightHandRotationYaw;
+		}
+	
 	}
 };

@@ -31,6 +31,17 @@ public:
 
 	void playFireMontage(bool bAiming);
 
+	//to test weapon rotation
+
+	UPROPERTY(EditAnywhere, Category = "WeaponRotation")
+	float RightHandRotationRoll = 180.f;
+
+	UPROPERTY(EditAnywhere, Category = "WeaponRotation")
+	float RightHandRotationYaw;
+
+	UPROPERTY(EditAnywhere, Category = "WeaponRotation")
+	float RightHandRotationPitch;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -118,4 +129,5 @@ public:
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch;  }
 	AWeapon* GetEquippedWeapon();
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return turningInPlace; }
+	FVector getHitTarget() const;
 };	

@@ -355,3 +355,10 @@ AWeapon* AChaosCharacter::GetEquippedWeapon()
 
 	return combat->equippedWeapon;
 }
+
+FVector AChaosCharacter::getHitTarget() const
+{
+	if (combat == nullptr) return FVector();
+
+	return combat->hitTarget;
+}
