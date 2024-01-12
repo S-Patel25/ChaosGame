@@ -72,6 +72,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	class UAnimationAsset* fireAnimation;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ACasing> casingClass; //so the weapon knows what class
+
 public:	
 	void SetWeaponState(EWeaponState state); //since enum is priv
 	FORCEINLINE USphereComponent* getAreaSphere() const { return areaSphere;  }

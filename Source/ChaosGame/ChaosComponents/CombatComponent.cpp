@@ -144,7 +144,6 @@ void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 	if (chaosCharacter == nullptr || weaponToEquip == nullptr) return; //check first
 	
 	equippedWeapon = weaponToEquip;
-
 	equippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped); //remember to update enum states
 
 	const USkeletalMeshSocket* handSocket = chaosCharacter->GetMesh()->GetSocketByName(FName("RightHandSocket")); //get the socket
