@@ -38,5 +38,5 @@ void ACasing::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 	}
 
 	Destroy();
-
+	
 }

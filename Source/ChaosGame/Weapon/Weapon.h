@@ -32,6 +32,23 @@ public:
 
 	virtual void Fire(const FVector& HitTarget); //reference is to avoid copy
 
+	//crosshairs for weapon
+
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	class UTexture2D* crosshairsCenter; //texture 2d for crosshairs
+
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* crosshairsLeft;
+
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* crosshairsRight;
+
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* crosshairsTop;
+
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* crosshairsBottom;
+
 protected:
 	virtual void BeginPlay() override;
 

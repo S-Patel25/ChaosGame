@@ -10,6 +10,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "ChaosGame/PlayerController/ChaosPlayerController.h"
+#include "ChaosGame/HUD/ChaosHUD.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -23,6 +25,13 @@ UCombatComponent::UCombatComponent()
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	PrimaryComponentTick.Target = this;
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.SetTickFunctionEnable(true);
+	PrimaryComponentTick.RegisterTickFunction(GetComponentLevel());
+
+	controller = Cast<AChaosPlayerController>(chaosCharacter->Controller);
 
 	if (chaosCharacter)
 	{
@@ -99,6 +108,43 @@ void UCombatComponent::traceUnderCrosshairs(FHitResult& TraceHitResult)
 
 }
 
+void UCombatComponent::setHUDCrosshairs(float DeltaTime)
+{
+	if (chaosCharacter == nullptr) return; //null check
+
+	controller = controller == nullptr ? Cast<AChaosPlayerController>(chaosCharacter->Controller) : controller; //cast to player controller
+
+	if (controller)
+	{
+		HUD = HUD == nullptr ? Cast<AChaosHUD>(controller->GetHUD()) : HUD; //same thing here, check for valid then cast
+
+		if (HUD)
+		{
+			FHUDPackage HUDPackage;
+
+			if (equippedWeapon)
+			{
+				HUDPackage.crosshairsCenter = equippedWeapon->crosshairsCenter;
+				HUDPackage.crosshairsLeft = equippedWeapon->crosshairsLeft;
+				HUDPackage.crosshairsRight = equippedWeapon->crosshairsRight;
+				HUDPackage.crosshairsBottom = equippedWeapon->crosshairsBottom;
+				HUDPackage.crosshairsTop = equippedWeapon->crosshairsTop;
+			}
+			else
+			{
+				HUDPackage.crosshairsCenter = nullptr;
+				HUDPackage.crosshairsLeft = nullptr;
+				HUDPackage.crosshairsRight = nullptr;
+				HUDPackage.crosshairsBottom = nullptr;
+				HUDPackage.crosshairsTop = nullptr;
+			}
+
+			HUD->SetHUDPackage(HUDPackage); //set crosshairs then call setter for HUD (if equipped)
+		}
+	}
+	
+}
+
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	MulticastFire(TraceHitTarget); //calling rom the server runs on server AND all clients
@@ -129,6 +175,8 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	setHUDCrosshairs(DeltaTime);
 
 }
 

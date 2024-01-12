@@ -46,10 +46,13 @@ protected:
 
 	void traceUnderCrosshairs(FHitResult& TraceHitResult); //making a function for the hit target
 
+	void setHUDCrosshairs(float DeltaTime);
 
 private:
 
 	class AChaosCharacter* chaosCharacter;
+	class AChaosPlayerController* controller;
+	class AChaosHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon) //needs to be replicated so animations can be seen on client aswell as server
 	AWeapon* equippedWeapon;
@@ -64,6 +67,8 @@ private:
 	float aimWalkSpeed;
 
 	bool bFireButtonPressed;
+
+
 
 public:	
 	

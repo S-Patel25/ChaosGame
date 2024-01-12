@@ -14,7 +14,7 @@
 
 AWeapon::AWeapon()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true; //multiplayer
 
 	weaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
@@ -143,7 +143,6 @@ void AWeapon::Fire(const FVector& HitTarget)
 			FTransform socketTransform = ammoEjectSocket->GetSocketTransform(weaponMesh); 
 			UWorld* world = GetWorld();
 
-			if (world)
 			{
 				world->SpawnActor<ACasing>( //just spawning actor so no need for other params
 					casingClass,
