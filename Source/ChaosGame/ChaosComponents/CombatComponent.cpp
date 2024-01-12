@@ -139,6 +139,32 @@ void UCombatComponent::setHUDCrosshairs(float DeltaTime)
 				HUDPackage.crosshairsTop = nullptr;
 			}
 
+
+			//calculate crosshair spread
+
+			// [0,600] -> [0,1] (mapping speed to 0 or 1)
+
+			FVector2D walkSpeedRange(0.f, chaosCharacter->GetCharacterMovement()->MaxWalkSpeed);
+			FVector2D velocityMultiplierRange(0.f, 1.f);
+
+			FVector velocity = chaosCharacter->GetVelocity();
+			velocity.Z = 0.f;
+
+			crosshairVelocityFactor = FMath::GetMappedRangeValueClamped(walkSpeedRange, velocityMultiplierRange, velocity.Size()); //change range based on velocity of character (.Size is for magnitude)
+
+			if (chaosCharacter->GetCharacterMovement()->IsFalling()) //in air crosshair spread
+			{
+				crosshairInAirFactor = FMath::FInterpTo(crosshairInAirFactor, 2.25f, DeltaTime, 2.25f); //interpolates smoothly while in air
+			}
+			else
+			{
+				crosshairInAirFactor = FMath::FInterpTo(crosshairInAirFactor, 0.f, DeltaTime, 30.f);
+			}
+
+
+
+			HUDPackage.crosshairSpread = crosshairVelocityFactor + crosshairInAirFactor;
+
 			HUD->SetHUDPackage(HUDPackage); //set crosshairs then call setter for HUD (if equipped)
 		}
 	}

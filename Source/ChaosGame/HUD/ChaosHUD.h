@@ -19,6 +19,8 @@ public:
 	UTexture2D* crosshairsBottom;
 	UTexture2D* crosshairsTop;
 
+	float crosshairSpread; //for dynamic spreading of crosshair
+
 };
 
 
@@ -37,7 +39,10 @@ public:
 private:
 	FHUDPackage HUDPackage;
 
-	void drawCrosshair(UTexture2D* texture, FVector2D viewportCenter); //handy function to make the crosshairs
+	void drawCrosshair(UTexture2D* texture, FVector2D viewportCenter, FVector2D spread); //handy function to make the crosshairs
+
+	UPROPERTY(EditAnywhere)
+	float crosshairSpreadMax = 16.f;
 
 public:
 
