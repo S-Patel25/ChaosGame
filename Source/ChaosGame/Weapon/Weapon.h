@@ -49,6 +49,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 	UTexture2D* crosshairsBottom;
 
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -92,8 +93,18 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> casingClass; //so the weapon knows what class
 
+	//zoom while aiming
+
+	UPROPERTY(EditAnywhere)
+	float zoomedFOV = 30.f;
+
+	UPROPERTY(EditAnywhere)
+	float zoomInterpSpeed = 20.f;
+
 public:	
 	void SetWeaponState(EWeaponState state); //since enum is priv
 	FORCEINLINE USphereComponent* getAreaSphere() const { return areaSphere;  }
 	FORCEINLINE USkeletalMeshComponent* getWeaponMesh() const { return weaponMesh; }
+	FORCEINLINE float getZoomedFOV() const { return zoomedFOV; }
+	FORCEINLINE float getZoomIntepSpeed() const { return zoomInterpSpeed; }
 };

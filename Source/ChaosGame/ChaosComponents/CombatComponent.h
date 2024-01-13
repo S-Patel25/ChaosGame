@@ -76,6 +76,20 @@ private:
 
 	FVector hitTarget;
 
+	//AIMING STUFF
+
+	float defaultFOV; //not aiming FOV
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float zoomedFOV = 30.f;
+
+	float currentFOV;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float zoomInterpSpeed = 30.f;
+
+	void interpFOV(float DeltaTime);
+
 public:	
 	
 };

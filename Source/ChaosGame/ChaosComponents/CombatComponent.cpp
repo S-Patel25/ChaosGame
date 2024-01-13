@@ -12,6 +12,7 @@
 #include "DrawDebugHelpers.h"
 #include "ChaosGame/PlayerController/ChaosPlayerController.h"
 #include "ChaosGame/HUD/ChaosHUD.h"
+#include "Camera/CameraComponent.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -36,6 +37,12 @@ void UCombatComponent::BeginPlay()
 	if (chaosCharacter)
 	{
 		chaosCharacter->GetCharacterMovement()->MaxWalkSpeed = baseWalkSpeed;
+
+		if (chaosCharacter->getFollowCamera())
+		{
+			defaultFOV = chaosCharacter->getFollowCamera()->FieldOfView;
+			currentFOV = defaultFOV;
+		}
 	}
 }
 
@@ -176,6 +183,28 @@ void UCombatComponent::setHUDCrosshairs(float DeltaTime)
 	
 }
 
+void UCombatComponent::interpFOV(float DeltaTime)
+{
+	if (equippedWeapon == nullptr) return;
+
+	if (bAiming)
+	{
+		currentFOV = FMath::FInterpTo(currentFOV, equippedWeapon->getZoomedFOV(), DeltaTime, equippedWeapon->getZoomIntepSpeed()); //interp to weapon zoom
+	}
+	else
+	{
+		currentFOV = FMath::FInterpTo(currentFOV, defaultFOV, DeltaTime, zoomInterpSpeed); //go back to normal once not aiming
+	}
+	
+
+	if (chaosCharacter && chaosCharacter->getFollowCamera())
+	{
+		chaosCharacter->getFollowCamera()->SetFieldOfView(currentFOV); //set it based on aim or not
+	}
+
+
+}
+
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	MulticastFire(TraceHitTarget); //calling rom the server runs on server AND all clients
@@ -207,13 +236,16 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	setHUDCrosshairs(DeltaTime);
+	
 
 	if (chaosCharacter && chaosCharacter->IsLocallyControlled())
 	{
 		FHitResult hitResult;
 		traceUnderCrosshairs(hitResult);
 		hitTarget = hitResult.ImpactPoint;
+
+		setHUDCrosshairs(DeltaTime);
+		interpFOV(DeltaTime);
 	}
 
 }
