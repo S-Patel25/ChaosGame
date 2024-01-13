@@ -76,6 +76,11 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 		FHitResult hitResult;
 		traceUnderCrosshairs(hitResult);
 		ServerFire(hitResult.ImpactPoint); //calling server RPC
+
+		if (equippedWeapon)
+		{
+			crosshairShootFactor = 0.75f; //better to use = then plus as crosshairs could get bigger and bigger (can also use clamp)
+		}
 	}
 }
 
@@ -166,16 +171,30 @@ void UCombatComponent::setHUDCrosshairs(float DeltaTime)
 
 			if (chaosCharacter->GetCharacterMovement()->IsFalling()) //in air crosshair spread
 			{
-				crosshairInAirFactor = FMath::FInterpTo(crosshairInAirFactor, 2.25f, DeltaTime, 2.25f); //interpolates smoothly while in air
+				crosshairInAirFactor = FMath::FInterpTo(crosshairInAirFactor, 2.25f, DeltaTime, 4.25f); //interpolates smoothly while in air
 			}
 			else
 			{
 				crosshairInAirFactor = FMath::FInterpTo(crosshairInAirFactor, 0.f, DeltaTime, 30.f);
 			}
 
+			if (bAiming)
+			{
+				crosshairAimFactor = FMath::FInterpTo(crosshairAimFactor, -0.45f, DeltaTime, 30.f); //hard coding aim values, can change later if needed (tweak and play with settings)
+			}
+			else
+			{
+				crosshairAimFactor = FMath::FInterpTo(crosshairAimFactor, 0.f, DeltaTime, 30.f);
+			}
 
+			crosshairShootFactor = FMath::FInterpTo(crosshairShootFactor, 0.f, DeltaTime, 40.f);
 
-			HUDPackage.crosshairSpread = crosshairVelocityFactor + crosshairInAirFactor;
+			HUDPackage.crosshairSpread = 
+				0.5f + //add base val so aim crosshairs dont shrink into themselves
+				crosshairVelocityFactor + 
+				crosshairInAirFactor +
+				crosshairAimFactor +
+				crosshairShootFactor;
 
 			HUD->SetHUDPackage(HUDPackage); //set crosshairs then call setter for HUD (if equipped)
 		}
