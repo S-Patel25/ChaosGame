@@ -7,6 +7,7 @@
 #include "InputActionValue.h" //we need this because we cannot forward declare a non-pointer variable
 #include "Net/UnrealNetwork.h"
 #include "ChaosGame/ChaosTypes/TurningInPlace.h"
+#include "ChaosGame/Interfaces/InteractWithCrosshairsInterface.h"
 #include "ChaosCharacter.generated.h"
 
 
@@ -15,7 +16,7 @@ class UInputAction;
 
 
 UCLASS()
-class CHAOSGAME_API AChaosCharacter : public ACharacter
+class CHAOSGAME_API AChaosCharacter : public ACharacter, public IInteractWithCrosshairsInterface //use I version for interfaces
 {
 	GENERATED_BODY()
 

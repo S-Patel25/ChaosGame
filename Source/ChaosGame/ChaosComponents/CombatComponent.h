@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ChaosGame/HUD/ChaosHUD.h"
 #include "CombatComponent.generated.h"
 
 class AWeapon;
@@ -77,6 +78,8 @@ private:
 	float crosshairShootFactor;
 
 	FVector hitTarget;
+
+	FHUDPackage HUDPackage;
 
 	//AIMING STUFF
 

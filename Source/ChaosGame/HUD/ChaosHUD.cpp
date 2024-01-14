@@ -19,33 +19,33 @@ void AChaosHUD::DrawHUD()
 		if (HUDPackage.crosshairsCenter)
 		{
 			FVector2D spread(0.f, 0.f); //no spread since center crosshair
-			drawCrosshair(HUDPackage.crosshairsCenter, viewportCenter, spread); //use function 
+			drawCrosshair(HUDPackage.crosshairsCenter, viewportCenter, spread, HUDPackage.crosshairsColor); //use function 
 		}
 		if (HUDPackage.crosshairsLeft)
 		{
 			FVector2D spread(-spreadScaled, 0.f); //will move based on char movement (aiming, not aiming etc,)
-			drawCrosshair(HUDPackage.crosshairsLeft, viewportCenter, spread);
+			drawCrosshair(HUDPackage.crosshairsLeft, viewportCenter, spread, HUDPackage.crosshairsColor);
 		}
 		if (HUDPackage.crosshairsRight)
 		{
 			FVector2D spread(spreadScaled, 0.f);
-			drawCrosshair(HUDPackage.crosshairsRight, viewportCenter, spread);
+			drawCrosshair(HUDPackage.crosshairsRight, viewportCenter, spread, HUDPackage.crosshairsColor);
 		}
 		if (HUDPackage.crosshairsBottom)
 		{
 			FVector2D spread(0.f, spreadScaled); 
-			drawCrosshair(HUDPackage.crosshairsBottom, viewportCenter, spread);
+			drawCrosshair(HUDPackage.crosshairsBottom, viewportCenter, spread, HUDPackage.crosshairsColor);
 		}
 		if (HUDPackage.crosshairsTop)
 		{
 			FVector2D spread(0.f, -spreadScaled); //remember for UV coords, -ve is upwards
-			drawCrosshair(HUDPackage.crosshairsTop, viewportCenter, spread);
+			drawCrosshair(HUDPackage.crosshairsTop, viewportCenter, spread, HUDPackage.crosshairsColor);
 		}
 	}
 
 }
 
-void AChaosHUD::drawCrosshair(UTexture2D* texture, FVector2D viewportCenter, FVector2D spread)
+void AChaosHUD::drawCrosshair(UTexture2D* texture, FVector2D viewportCenter, FVector2D spread, FLinearColor crosshairsColor)
 {
 	const float textureWidth = texture->GetSizeX();
 	const float textureHeight = texture->GetSizeY(); //need to do some math to get perfect center position
@@ -66,6 +66,6 @@ void AChaosHUD::drawCrosshair(UTexture2D* texture, FVector2D viewportCenter, FVe
 		0.f,
 		1.f,
 		1.f,
-		FLinearColor::White
+		crosshairsColor
 	);
 }

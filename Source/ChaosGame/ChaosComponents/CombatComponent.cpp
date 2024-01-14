@@ -11,7 +11,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "ChaosGame/PlayerController/ChaosPlayerController.h"
-#include "ChaosGame/HUD/ChaosHUD.h"
 #include "Camera/CameraComponent.h"
 
 UCombatComponent::UCombatComponent()
@@ -123,6 +122,15 @@ void UCombatComponent::traceUnderCrosshairs(FHitResult& TraceHitResult)
 		}
 	}
 
+	if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>()) //check to see if it implements interface
+	{
+		HUDPackage.crosshairsColor = FLinearColor::Red;
+	}
+	else
+	{
+		HUDPackage.crosshairsColor = FLinearColor::White;
+	}
+
 }
 
 void UCombatComponent::setHUDCrosshairs(float DeltaTime)
@@ -137,7 +145,6 @@ void UCombatComponent::setHUDCrosshairs(float DeltaTime)
 
 		if (HUD)
 		{
-			FHUDPackage HUDPackage;
 
 			if (equippedWeapon)
 			{
