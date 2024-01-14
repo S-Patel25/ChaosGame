@@ -257,6 +257,7 @@ void AChaosCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	AimOffset(DeltaTime); //every tick
+	hideCameraIfCharacterClose();
 }
 
 
@@ -301,6 +302,31 @@ void AChaosCharacter::TurnInPlace(float DeltaTime)
 			startingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		}
 	}
+}
+
+void AChaosCharacter::hideCameraIfCharacterClose()
+{
+	if (!IsLocallyControlled()) return;
+
+	if ((followCamera->GetComponentLocation() - GetActorLocation()).Size() < cameraThreshold)
+	{
+		GetMesh()->SetVisibility(false); //hides char mesh when blocked by wall so player can still see
+
+		if (combat && combat->equippedWeapon && combat->equippedWeapon->getWeaponMesh())
+		{
+			combat->equippedWeapon->getWeaponMesh()->bOwnerNoSee = true; //bOwnerNoSee is so that owner (player) gets affected only
+		}
+	}
+	else
+	{
+		GetMesh()->SetVisibility(true);
+
+		if (combat && combat->equippedWeapon && combat->equippedWeapon->getWeaponMesh())
+		{
+			combat->equippedWeapon->getWeaponMesh()->bOwnerNoSee = false;
+		}
+	}
+
 }
 
 void AChaosCharacter::SetOverlappingWeapon(AWeapon* weapon)

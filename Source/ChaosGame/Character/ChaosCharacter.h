@@ -121,6 +121,11 @@ private:
 	class UAnimMontage* fireWeaponMontage;
 
 
+	void hideCameraIfCharacterClose();
+
+	UPROPERTY(EditAnywhere)
+	float cameraThreshold = 200.f;
+
 public:
 
 	void SetOverlappingWeapon(AWeapon* weapon);

@@ -109,6 +109,13 @@ void UCombatComponent::traceUnderCrosshairs(FHitResult& TraceHitResult)
 		FVector start = crosshairWorldPosition;
 		FVector end = start + crosshairWorldDirection * TRACE_LENGTH; //multiply by big val since its a world direction var is a unit vector (length 1)
 
+		if (chaosCharacter)
+		{
+			float distanceToCharacter = (chaosCharacter->GetActorLocation() - start).Size();
+			start += crosshairWorldDirection * (distanceToCharacter + 100.f); //making line trace to start a bit in front of character to solve collision issues
+		}
+
+
 		GetWorld()->LineTraceSingleByChannel( //line trace on visibility channel
 			TraceHitResult,
 			start,
