@@ -6,10 +6,10 @@
 
 void UOverheadWidget::SetDisplayText(FString TextToDisplay)
 {
-	if (DisplayText)
+	/*if (DisplayText)
 	{
 		DisplayText->SetText(FText::FromString(TextToDisplay));
-	}
+	}*/
 }
 
 void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)

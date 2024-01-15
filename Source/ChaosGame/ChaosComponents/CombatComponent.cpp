@@ -12,6 +12,7 @@
 #include "DrawDebugHelpers.h"
 #include "ChaosGame/PlayerController/ChaosPlayerController.h"
 #include "Camera/CameraComponent.h"
+#include "TimerManager.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -70,17 +71,25 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
 
-	if (bFireButtonPressed)
+	if (bFireButtonPressed && equippedWeapon)
 	{
-		FHitResult hitResult;
-		traceUnderCrosshairs(hitResult);
-		ServerFire(hitResult.ImpactPoint); //calling server RPC
+		Fire();
+	}
 
+}
+
+void UCombatComponent::Fire()
+{
+	//if (bCanFire)
+	//{
+		//bCanFire = false;
+		ServerFire(hitTarget); //calling server RPC
 		if (equippedWeapon)
 		{
 			crosshairShootFactor = 0.75f; //better to use = then plus as crosshairs could get bigger and bigger (can also use clamp)
 		}
-	}
+		startFireTimer(); //start here
+	//}
 }
 
 void UCombatComponent::traceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -234,7 +243,33 @@ void UCombatComponent::interpFOV(float DeltaTime)
 	{
 		chaosCharacter->getFollowCamera()->SetFieldOfView(currentFOV); //set it based on aim or not
 	}
+	
 
+}
+
+void UCombatComponent::startFireTimer()
+{
+	if (equippedWeapon == nullptr || chaosCharacter == nullptr) return;
+
+	chaosCharacter->GetWorldTimerManager().SetTimer( //using timers to get auto fire working
+		fireTimer,
+		this,
+		&UCombatComponent::fireTimerFinished,
+		equippedWeapon->fireDelay
+	);
+
+
+}
+
+void UCombatComponent::fireTimerFinished()
+{
+	if (equippedWeapon == nullptr) return;
+
+	//bCanFire = true;
+	if (bFireButtonPressed && equippedWeapon->bAutomatic)
+	{
+		Fire();
+	}
 
 }
 

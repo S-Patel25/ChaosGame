@@ -37,6 +37,8 @@ protected:
 
 	void FireButtonPressed(bool bPressed);
 
+	void Fire();
+
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget); //RPC so fire effects can be seen
 	//net quantize sends info in a efficient matter (whole numbers, not rounded therefore is faster and less bandwidth taken)
@@ -94,6 +96,15 @@ private:
 	float zoomInterpSpeed = 30.f;
 
 	void interpFOV(float DeltaTime);
+
+	//AUTO FIRE STUFF
+
+	FTimerHandle fireTimer;
+
+	bool bCanFire;
+
+	void startFireTimer();
+	void fireTimerFinished();
 
 public:	
 	
