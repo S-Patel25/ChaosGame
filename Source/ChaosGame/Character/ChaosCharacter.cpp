@@ -96,6 +96,13 @@ void AChaosCharacter::playFireMontage(bool bAiming)
 
 }
 
+void AChaosCharacter::OnRep_ReplicatedMovement()
+{
+	Super::OnRep_ReplicatedMovement();
+	SimProxiesTurn();
+	timeSinceLastMovementReplication = 0.f;
+}
+
 void AChaosCharacter::playHitReactMontage()
 {
 	if (combat == nullptr || combat->equippedWeapon == nullptr) return;
@@ -214,14 +221,13 @@ void AChaosCharacter::AimOffset(float DeltaTime)
 {
 	if (combat && combat->equippedWeapon == nullptr) return; //leave function early if no weapon equipped
 
-	FVector velocity = GetVelocity(); //getting speed var from velocity
-	velocity.Z = 0.f;
-	float speed = velocity.Size();
+	float speed = calculateSpeed();
 
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 
 	if (speed == 0.f && !bIsInAir) //standing still and not jumping
 	{
+		bRotateRootBone = true;
 		FRotator currentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		FRotator deltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(currentAimRotation, startingAimRotation);
 		AO_Yaw = deltaAimRotation.Yaw;
@@ -236,12 +242,18 @@ void AChaosCharacter::AimOffset(float DeltaTime)
 
 	if (speed > 0.f || bIsInAir) //running or jumping
 	{
+		bRotateRootBone = false;
 		startingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f); //storing the yaw so we can correctly apply offset
 		AO_Yaw = 0.f;
 		bUseControllerRotationYaw = true;
 		turningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
+	
+	CalculateAO_Pitch();
+}
 
+void AChaosCharacter::CalculateAO_Pitch()
+{
 	AO_Pitch = GetBaseAimRotation().Pitch; //much easier however pitch is changed when sent across network (compressed and positive) so we have to account for that
 
 	if (AO_Pitch > 90.f && !IsLocallyControlled()) //do correction when pitch > 90 degrees
@@ -252,6 +264,48 @@ void AChaosCharacter::AimOffset(float DeltaTime)
 		FVector2D outRange(-90.f, 0.f);
 		AO_Pitch = FMath::GetMappedRangeValueClamped(inRange, outRange, AO_Pitch); //handy function to map for us
 	}
+}
+
+void AChaosCharacter::SimProxiesTurn()
+{
+	if (combat == nullptr || combat->equippedWeapon == nullptr) return;
+
+	bRotateRootBone = false;
+
+	float speed = calculateSpeed();
+
+	if (speed > 0.f)
+	{
+		turningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+
+	proxyRotationLastFrame = proxyRotation;
+	proxyRotation = GetActorRotation();
+	proxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(proxyRotation, proxyRotationLastFrame).Yaw; //get yaw from last frame till current
+
+
+	if (FMath::Abs(proxyYaw) > turnThreshold)
+	{
+		if (proxyYaw > turnThreshold)
+		{
+			turningInPlace = ETurningInPlace::ETIP_Right;
+		}
+		else if (proxyYaw < -turnThreshold)
+		{
+			turningInPlace = ETurningInPlace::ETIP_Left;
+		}
+		else
+		{
+			turningInPlace = ETurningInPlace::ETIP_NotTurning;
+		}
+
+		return;
+	}
+
+	turningInPlace = ETurningInPlace::ETIP_NotTurning;
+
+
 
 }
 
@@ -265,16 +319,29 @@ void AChaosCharacter::Jump()
 	{
 		Super::Jump();
 	}
-
-
-
 }
 
 
 void AChaosCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	AimOffset(DeltaTime); //every tick
+
+	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled()) //since in order (enum are ints, sim proxie is lower then other ones)
+	{
+		AimOffset(DeltaTime); //every tick
+	}
+	else
+	{
+		timeSinceLastMovementReplication += DeltaTime; //so we can call after a while
+
+		if (timeSinceLastMovementReplication > 0.25f)
+		{
+			OnRep_ReplicatedMovement();
+		}
+
+		CalculateAO_Pitch();
+	}
+
 	hideCameraIfCharacterClose();
 }
 
@@ -351,6 +418,13 @@ void AChaosCharacter::hideCameraIfCharacterClose()
 		}
 	}
 
+}
+
+float AChaosCharacter::calculateSpeed()
+{
+	FVector velocity = GetVelocity(); //getting speed var from velocity
+	velocity.Z = 0.f;
+	return velocity.Size();
 }
 
 void AChaosCharacter::SetOverlappingWeapon(AWeapon* weapon)

@@ -35,6 +35,8 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) //cosmetic, do not need it to be reliable
 	void multicastHit(); //rpc for making hit react on all clients 
 
+	virtual void OnRep_ReplicatedMovement() override; //to have the sim proxy update faster
+
 	//to test weapon rotation
 
 	UPROPERTY(EditAnywhere, Category = "WeaponRotation")
@@ -90,6 +92,8 @@ protected:
 
 
 	void AimOffset(float DeltaTime);
+	void CalculateAO_Pitch();
+	void SimProxiesTurn(); //this function is to fix the jitter on sim proxies as anim bp does not update every frame
 	virtual void Jump() override;
 
 private:
@@ -133,6 +137,16 @@ private:
 	UPROPERTY(EditAnywhere)
 	float cameraThreshold = 200.f;
 
+	bool bRotateRootBone;
+
+	float turnThreshold = 0.5f;
+	FRotator proxyRotationLastFrame;
+	FRotator proxyRotation; //current
+	float proxyYaw;
+	float timeSinceLastMovementReplication;
+
+	float calculateSpeed(); //refactored method
+
 public:
 
 	void SetOverlappingWeapon(AWeapon* weapon);
@@ -144,4 +158,5 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return turningInPlace; }
 	FVector getHitTarget() const;
 	FORCEINLINE UCameraComponent* getFollowCamera() const { return followCamera; }
+	FORCEINLINE bool shouldRotateRootBone() const { return bRotateRootBone;  }
 };	
