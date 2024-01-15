@@ -32,6 +32,9 @@ public:
 
 	void playFireMontage(bool bAiming);
 
+	UFUNCTION(NetMulticast, Unreliable) //cosmetic, do not need it to be reliable
+	void multicastHit(); //rpc for making hit react on all clients 
+
 	//to test weapon rotation
 
 	UPROPERTY(EditAnywhere, Category = "WeaponRotation")
@@ -45,6 +48,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	void playHitReactMontage();
 
 	//INPUT
 
@@ -120,6 +125,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* fireWeaponMontage;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* hitReactMontage;
 
 	void hideCameraIfCharacterClose();
 

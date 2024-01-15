@@ -14,6 +14,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "ChaosAnimInstance.h"
+#include "ChaosGame/ChaosGame.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -43,6 +44,7 @@ AChaosCharacter::AChaosCharacter()
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true; //setting this on c++ code aswell as BP's
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh); //mesh is the collision now, compared to pawn
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 850.f, 0.f);
@@ -92,6 +94,22 @@ void AChaosCharacter::playFireMontage(bool bAiming)
 	}
 
 
+}
+
+void AChaosCharacter::playHitReactMontage()
+{
+	if (combat == nullptr || combat->equippedWeapon == nullptr) return;
+
+	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+
+	if (animInstance && hitReactMontage)
+	{
+		animInstance->Montage_Play(hitReactMontage); //play montage
+
+		FName sectionName("FromFront");
+
+		animInstance->Montage_JumpToSection(sectionName);
+	}
 }
 
 void AChaosCharacter::BeginPlay()
@@ -302,6 +320,12 @@ void AChaosCharacter::TurnInPlace(float DeltaTime)
 			startingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		}
 	}
+}
+
+void AChaosCharacter::multicastHit_Implementation()
+{
+	playHitReactMontage();
+
 }
 
 void AChaosCharacter::hideCameraIfCharacterClose()

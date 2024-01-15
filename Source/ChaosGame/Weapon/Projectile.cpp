@@ -8,6 +8,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
+#include "ChaosGame/Character/ChaosCharacter.h"
+#include "ChaosGame/ChaosGame.h"
 
 AProjectile::AProjectile()
 {
@@ -24,6 +26,7 @@ AProjectile::AProjectile()
 
 	collisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	collisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic , ECollisionResponse::ECR_Block);
+	collisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block); //so we dont trace on the pawn, only mesh
 
 	projectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component")); 
 
@@ -55,6 +58,14 @@ void AProjectile::BeginPlay()
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+
+	AChaosCharacter* chaosCharacter = Cast<AChaosCharacter>(OtherActor); //cast
+
+	if (chaosCharacter)
+	{
+		chaosCharacter->multicastHit();
+	}
+
 	Destroy(); //so it doesn't stick (overrided function is already replicated, so we take advantage of that)
 }
 
