@@ -59,13 +59,6 @@ void AProjectile::BeginPlay()
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 
-	AChaosCharacter* chaosCharacter = Cast<AChaosCharacter>(OtherActor); //cast
-
-	if (chaosCharacter)
-	{
-		chaosCharacter->multicastHit();
-	}
-
 	Destroy(); //so it doesn't stick (overrided function is already replicated, so we take advantage of that)
 }
 

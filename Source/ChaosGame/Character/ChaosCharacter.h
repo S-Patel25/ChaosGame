@@ -30,10 +30,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override; //function override to keep track of replicated variables
 	virtual void PostInitializeComponents() override;
 
-	void playFireMontage(bool bAiming);
-
-	UFUNCTION(NetMulticast, Unreliable) //cosmetic, do not need it to be reliable
-	void multicastHit(); //rpc for making hit react on all clients 
+	void playFireMontage(bool bAiming); 
 
 	virtual void OnRep_ReplicatedMovement() override; //to have the sim proxy update faster
 
@@ -51,7 +48,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void updateHUDHealth();
+
 	void playHitReactMontage();
+
+	UFUNCTION() //dont forget UFUNCTION macro for callbacks
+	void recieveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser); //specific function callback
 
 	//INPUT
 

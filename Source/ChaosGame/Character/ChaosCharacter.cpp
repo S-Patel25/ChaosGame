@@ -120,6 +120,15 @@ void AChaosCharacter::playHitReactMontage()
 	}
 }
 
+void AChaosCharacter::recieveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	health = FMath::Clamp(health - Damage, 0.f, maxHealth);
+	updateHUDHealth();
+	playHitReactMontage(); //played on server (make sure to put in OnRep method aswell
+
+
+}
+
 void AChaosCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -132,8 +141,18 @@ void AChaosCharacter::BeginPlay()
 		}
 	}
 
-	chaosPlayerController = Cast<AChaosPlayerController>(Controller); //cast to controller class
-	
+	updateHUDHealth();
+
+	if (HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &AChaosCharacter::recieveDamage); //bind to damage delegate
+	}
+}
+
+void AChaosCharacter::updateHUDHealth()
+{
+	chaosPlayerController = chaosPlayerController == nullptr ? Cast<AChaosPlayerController>(Controller) : chaosPlayerController; //cast to controller class
+
 	if (chaosPlayerController)
 	{
 		chaosPlayerController->setHUDHealth(health, maxHealth); //set health based on characters heatlh
@@ -396,11 +415,6 @@ void AChaosCharacter::TurnInPlace(float DeltaTime)
 	}
 }
 
-void AChaosCharacter::multicastHit_Implementation()
-{
-	playHitReactMontage();
-
-}
 
 void AChaosCharacter::hideCameraIfCharacterClose()
 {
@@ -436,8 +450,8 @@ float AChaosCharacter::calculateSpeed()
 
 void AChaosCharacter::OnRep_Health()
 {
-
-
+	updateHUDHealth();
+	playHitReactMontage(); //health is replicated, so better to use rep notify then RPC everytime (takes up bandwidth)
 }
 
 void AChaosCharacter::SetOverlappingWeapon(AWeapon* weapon)
