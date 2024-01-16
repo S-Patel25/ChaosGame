@@ -14,4 +14,14 @@ class CHAOSGAME_API AChaosPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+
+public:
+
+	void setHUDHealth(float health, float maxHealth);
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	class AChaosHUD* chaosHUD;
 };

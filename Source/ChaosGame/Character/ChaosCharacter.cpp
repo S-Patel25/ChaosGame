@@ -15,6 +15,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "ChaosAnimInstance.h"
 #include "ChaosGame/ChaosGame.h"
+#include "ChaosGame/PlayerController/ChaosPlayerController.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -63,7 +64,7 @@ void AChaosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps); //make sure to always call super
 
 	DOREPLIFETIME_CONDITION(AChaosCharacter, overlappingWeapon, COND_OwnerOnly); //macro for replication with a condition (owner only means for pawn specific, so only player who interacts will be affected)
-
+	DOREPLIFETIME(AChaosCharacter, health);
 }
 
 void AChaosCharacter::PostInitializeComponents()
@@ -130,7 +131,13 @@ void AChaosCharacter::BeginPlay()
 			subSystem->AddMappingContext(chaosContext, 0); //add it to the subsystem
 		}
 	}
+
+	chaosPlayerController = Cast<AChaosPlayerController>(Controller); //cast to controller class
 	
+	if (chaosPlayerController)
+	{
+		chaosPlayerController->setHUDHealth(health, maxHealth); //set health based on characters heatlh
+	}
 }
 
 void AChaosCharacter::Movement(const FInputActionValue& Value)
@@ -425,6 +432,12 @@ float AChaosCharacter::calculateSpeed()
 	FVector velocity = GetVelocity(); //getting speed var from velocity
 	velocity.Z = 0.f;
 	return velocity.Size();
+}
+
+void AChaosCharacter::OnRep_Health()
+{
+
+
 }
 
 void AChaosCharacter::SetOverlappingWeapon(AWeapon* weapon)

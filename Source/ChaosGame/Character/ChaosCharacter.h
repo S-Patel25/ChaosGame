@@ -147,6 +147,19 @@ private:
 
 	float calculateSpeed(); //refactored method
 
+	//HEALTH STUFF
+
+	UPROPERTY(EditAnywhere, Category = "PlayerStats")
+	float maxHealth = 100.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "PlayerStats")
+	float health = 100.f;
+
+	UFUNCTION()
+	void OnRep_Health();
+
+	class AChaosPlayerController* chaosPlayerController;
+
 public:
 
 	void SetOverlappingWeapon(AWeapon* weapon);

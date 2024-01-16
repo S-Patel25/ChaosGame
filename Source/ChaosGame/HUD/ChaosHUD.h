@@ -37,6 +37,15 @@ class CHAOSGAME_API AChaosHUD : public AHUD
 public:
 	virtual void DrawHUD() override; //overriding built in HUD function
 
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<class UUserWidget> characterOverlayClass;
+
+	class UCharacterOverlay* characterOverlay;
+
+private:
+	virtual void BeginPlay() override;
+	void addCharacterOverlay();
+
 private:
 	FHUDPackage HUDPackage;
 

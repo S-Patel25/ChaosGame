@@ -2,6 +2,27 @@
 
 
 #include "ChaosHUD.h"
+#include "GameFramework/PlayerController.h"
+#include "CharacterOverlay.h"
+
+void AChaosHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	addCharacterOverlay();
+
+}
+
+void AChaosHUD::addCharacterOverlay()
+{
+	APlayerController* playerController = GetOwningPlayerController();
+
+	if (playerController && characterOverlayClass)
+	{
+		characterOverlay = CreateWidget<UCharacterOverlay>(playerController, characterOverlayClass);
+		characterOverlay->AddToViewport();
+	}
+}
 
 void AChaosHUD::DrawHUD()
 {
