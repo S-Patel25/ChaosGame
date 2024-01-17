@@ -17,6 +17,7 @@
 #include "ChaosGame/ChaosGame.h"
 #include "ChaosGame/PlayerController/ChaosPlayerController.h"
 #include "ChaosGame/Gamemode/ChaosGameMode.h"
+#include "TimerManager.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -116,10 +117,35 @@ void AChaosCharacter::OnRep_ReplicatedMovement()
 	timeSinceLastMovementReplication = 0.f;
 }
 
-void AChaosCharacter::elim_Implementation()
+void AChaosCharacter::Elim()
+{
+	multicastElim();
+
+	GetWorldTimerManager().SetTimer(
+		elimTimer,
+		this,
+		&AChaosCharacter::elimTimerFinished,
+		elimDelay
+	);
+
+}
+
+
+void AChaosCharacter::multicastElim_Implementation()
 {
 	bElimmed = true;
 	playElimMontage(); //will play when character health is 0
+}
+
+void AChaosCharacter::elimTimerFinished()
+{
+	AChaosGameMode* chaosGameMode = GetWorld()->GetAuthGameMode<AChaosGameMode>();
+
+	if (chaosGameMode)
+	{
+		chaosGameMode->requestRespawn(this, Controller);
+	}
+
 }
 
 void AChaosCharacter::playHitReactMontage()
@@ -486,6 +512,7 @@ void AChaosCharacter::OnRep_Health()
 	}
 	
 }
+
 
 void AChaosCharacter::SetOverlappingWeapon(AWeapon* weapon)
 {

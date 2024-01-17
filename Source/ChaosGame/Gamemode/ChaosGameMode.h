@@ -17,6 +17,8 @@ public:
 
 	virtual void playerEliminated(class AChaosCharacter* elimmedCharacter, class AChaosPlayerController* victimController, class AChaosPlayerController* attackerController);
 
+	virtual void requestRespawn(ACharacter* elimmedCharacter, AController* elimmedController);
+
 protected:
 
 

@@ -36,8 +36,10 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override; //to have the sim proxy update faster
 
+	void Elim(); //server elim, one below is for client (hence multicast)
+
 	UFUNCTION(NetMulticast, Reliable)
-	void elim();
+	void multicastElim();
 
 	//to test weapon rotation
 
@@ -171,6 +173,13 @@ private:
 	class AChaosPlayerController* chaosPlayerController;
 
 	bool bElimmed = false;
+
+	FTimerHandle elimTimer;
+
+	UPROPERTY(EditDefaultsOnly) //should be same for all players
+	float elimDelay = 3.f; 
+
+	void elimTimerFinished();
 
 public:
 
