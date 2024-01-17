@@ -34,6 +34,8 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override; //to have the sim proxy update faster
 
+	void elim();
+
 	//to test weapon rotation
 
 	UPROPERTY(EditAnywhere, Category = "WeaponRotation")

@@ -16,6 +16,7 @@
 #include "ChaosAnimInstance.h"
 #include "ChaosGame/ChaosGame.h"
 #include "ChaosGame/PlayerController/ChaosPlayerController.h"
+#include "ChaosGame/Gamemode/ChaosGameMode.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -104,6 +105,12 @@ void AChaosCharacter::OnRep_ReplicatedMovement()
 	timeSinceLastMovementReplication = 0.f;
 }
 
+void AChaosCharacter::elim()
+{
+	
+
+}
+
 void AChaosCharacter::playHitReactMontage()
 {
 	if (combat == nullptr || combat->equippedWeapon == nullptr) return;
@@ -126,7 +133,19 @@ void AChaosCharacter::recieveDamage(AActor* DamagedActor, float Damage, const UD
 	updateHUDHealth();
 	playHitReactMontage(); //played on server (make sure to put in OnRep method aswell
 
+	if (health == 0.f) //only do when player eliminated
+	{
+		AChaosGameMode* chaosGameMode = GetWorld()->GetAuthGameMode<AChaosGameMode>(); //auth game mode gets game mode
 
+		if (chaosGameMode)
+		{
+			chaosPlayerController = chaosPlayerController == nullptr ? Cast<AChaosPlayerController>(Controller) : chaosPlayerController;
+			AChaosPlayerController* attackerController = Cast<AChaosPlayerController>(InstigatorController); //who does the damage
+
+			chaosGameMode->playerEliminated(this, chaosPlayerController, attackerController);
+		}
+	}
+	
 }
 
 void AChaosCharacter::BeginPlay()
