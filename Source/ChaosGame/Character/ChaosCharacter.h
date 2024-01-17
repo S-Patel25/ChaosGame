@@ -32,8 +32,11 @@ public:
 
 	void playFireMontage(bool bAiming); 
 
+	void playElimMontage();
+
 	virtual void OnRep_ReplicatedMovement() override; //to have the sim proxy update faster
 
+	UFUNCTION(NetMulticast, Reliable)
 	void elim();
 
 	//to test weapon rotation
@@ -136,6 +139,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* hitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* elimMontage;
+
 	void hideCameraIfCharacterClose();
 
 	UPROPERTY(EditAnywhere)
@@ -164,6 +170,8 @@ private:
 
 	class AChaosPlayerController* chaosPlayerController;
 
+	bool bElimmed = false;
+
 public:
 
 	void SetOverlappingWeapon(AWeapon* weapon);
@@ -175,5 +183,6 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return turningInPlace; }
 	FVector getHitTarget() const;
 	FORCEINLINE UCameraComponent* getFollowCamera() const { return followCamera; }
-	FORCEINLINE bool shouldRotateRootBone() const { return bRotateRootBone;  }
+	FORCEINLINE bool shouldRotateRootBone() const { return bRotateRootBone; }
+	FORCEINLINE bool isElimmed() const { return bElimmed; }
 };	

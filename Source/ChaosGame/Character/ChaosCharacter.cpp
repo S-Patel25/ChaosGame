@@ -98,6 +98,17 @@ void AChaosCharacter::playFireMontage(bool bAiming)
 
 }
 
+void AChaosCharacter::playElimMontage()
+{
+	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+
+	if (animInstance && elimMontage)
+	{
+		animInstance->Montage_Play(elimMontage); //play montage
+	}
+
+}
+
 void AChaosCharacter::OnRep_ReplicatedMovement()
 {
 	Super::OnRep_ReplicatedMovement();
@@ -105,10 +116,10 @@ void AChaosCharacter::OnRep_ReplicatedMovement()
 	timeSinceLastMovementReplication = 0.f;
 }
 
-void AChaosCharacter::elim()
+void AChaosCharacter::elim_Implementation()
 {
-	
-
+	bElimmed = true;
+	playElimMontage(); //will play when character health is 0
 }
 
 void AChaosCharacter::playHitReactMontage()
@@ -117,12 +128,10 @@ void AChaosCharacter::playHitReactMontage()
 
 	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
 
-	if (animInstance && hitReactMontage)
+	if (animInstance && hitReactMontage && !animInstance->IsAnyMontagePlaying()) //check to prevent multiple montages playing
 	{
 		animInstance->Montage_Play(hitReactMontage); //play montage
-
 		FName sectionName("FromFront");
-
 		animInstance->Montage_JumpToSection(sectionName);
 	}
 }
@@ -470,7 +479,12 @@ float AChaosCharacter::calculateSpeed()
 void AChaosCharacter::OnRep_Health()
 {
 	updateHUDHealth();
-	playHitReactMontage(); //health is replicated, so better to use rep notify then RPC everytime (takes up bandwidth)
+
+	if (!bElimmed)
+	{
+		playHitReactMontage(); //health is replicated, so better to use rep notify then RPC everytime (takes up bandwidth)
+	}
+	
 }
 
 void AChaosCharacter::SetOverlappingWeapon(AWeapon* weapon)

@@ -43,6 +43,7 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bAiming = chaosCharacter->isAiming();
 	turningInPlace = chaosCharacter->GetTurningInPlace();
 	bRotateRootBone = chaosCharacter->shouldRotateRootBone();
+	bElimmed = chaosCharacter->isElimmed();
 
 	//yaw offset strafing
 	FRotator aimRotation = chaosCharacter->GetBaseAimRotation(); //keep track of aim rotation so we can change yaw and lean

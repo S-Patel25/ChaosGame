@@ -7,6 +7,9 @@
 
 void AChaosGameMode::playerEliminated(AChaosCharacter* elimmedCharacter, AChaosPlayerController* victimController, AChaosPlayerController* attackerController)
 {
-
+	if (elimmedCharacter)
+	{
+		elimmedCharacter->elim();
+	}
 
 }
