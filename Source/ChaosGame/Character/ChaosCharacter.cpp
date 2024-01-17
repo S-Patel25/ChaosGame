@@ -58,7 +58,7 @@ AChaosCharacter::AChaosCharacter()
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f; //how many times it will be replicated (66 and 33 are common used in fast paced shooter games)
 
-
+	dissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("Dissolve Timeline Component"));
 }
 
 void AChaosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -135,6 +135,18 @@ void AChaosCharacter::multicastElim_Implementation()
 {
 	bElimmed = true;
 	playElimMontage(); //will play when character health is 0
+
+	if (dissolveMaterialInstance)
+	{
+		dynamicDissolveMI = UMaterialInstanceDynamic::Create(dissolveMaterialInstance, this);
+
+		GetMesh()->SetMaterial(0, dynamicDissolveMI); //set dynamic mesh material
+
+		dynamicDissolveMI->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
+		dynamicDissolveMI->SetScalarParameterValue(TEXT("Glow"), 200.f);
+	}
+
+	startDissolve();
 }
 
 void AChaosCharacter::elimTimerFinished()
@@ -513,6 +525,28 @@ void AChaosCharacter::OnRep_Health()
 	
 }
 
+
+void AChaosCharacter::updateDissolveMaterial(float dissolveValue)
+{
+	if (dynamicDissolveMI)
+	{
+		dynamicDissolveMI->SetScalarParameterValue(TEXT("Dissolve"), dissolveValue);
+	}
+
+}
+
+void AChaosCharacter::startDissolve()
+{
+	dissolveTrack.BindDynamic(this, &AChaosCharacter::updateDissolveMaterial); //binding dynamic delegate
+
+	if (dissolveCurve && dissolveTimeline)
+	{
+		dissolveTimeline->AddInterpFloat(dissolveCurve, dissolveTrack); //makes sure timeline uses the curve
+		dissolveTimeline->Play();
+	}
+
+
+}
 
 void AChaosCharacter::SetOverlappingWeapon(AWeapon* weapon)
 {

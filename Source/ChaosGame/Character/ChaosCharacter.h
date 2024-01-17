@@ -8,6 +8,7 @@
 #include "Net/UnrealNetwork.h"
 #include "ChaosGame/ChaosTypes/TurningInPlace.h"
 #include "ChaosGame/Interfaces/InteractWithCrosshairsInterface.h"
+#include "Components/TimelineComponent.h"
 #include "ChaosCharacter.generated.h"
 
 
@@ -180,6 +181,26 @@ private:
 	float elimDelay = 3.f; 
 
 	void elimTimerFinished();
+
+	//DISSOLVE STUFF
+
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* dissolveTimeline;
+
+	FOnTimelineFloat dissolveTrack;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* dissolveCurve;
+
+	UFUNCTION() //since we're binding to a track
+	void updateDissolveMaterial(float dissolveValue);
+	void startDissolve();
+
+	UPROPERTY(VisibleAnywhere, Category = "Elim") //dyanmically adjusted at runtime
+	UMaterialInstanceDynamic* dynamicDissolveMI;
+
+	UPROPERTY(EditAnywhere, Category = "Elim") //this one is set
+	UMaterialInstance* dissolveMaterialInstance;
 
 public:
 

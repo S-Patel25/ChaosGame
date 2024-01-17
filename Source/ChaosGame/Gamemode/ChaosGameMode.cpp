@@ -33,5 +33,5 @@ void AChaosGameMode::requestRespawn(ACharacter* elimmedCharacter, AController* e
 		RestartPlayerAtPlayerStart(elimmedController, playerStarts[selection]); //essentially a player respawn method
 
 	}
-
+	
 }
