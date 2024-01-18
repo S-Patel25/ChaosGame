@@ -6,6 +6,7 @@
 #include "ChaosGame/HUD/CharacterOverlay.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "ChaosGame/Character/ChaosCharacter.h"
 
 void AChaosPlayerController::BeginPlay()
 {
@@ -30,6 +31,20 @@ void AChaosPlayerController::setHUDHealth(float health, float maxHealth)
 		FString healthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(health), FMath::CeilToInt(maxHealth)); //will show health and maxhealth (%d)
 
 		chaosHUD->characterOverlay->HealthText->SetText(FText::FromString(healthText));
+	}
+
+	
+}
+
+void AChaosPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	AChaosCharacter* chaosCharacter = Cast<AChaosCharacter>(InPawn); //cast to pawn
+
+	if (chaosCharacter)
+	{
+		setHUDHealth(chaosCharacter->getHealth(), chaosCharacter->getMaxHealth());
 	}
 
 

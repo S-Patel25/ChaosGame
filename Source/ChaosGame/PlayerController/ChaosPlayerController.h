@@ -18,6 +18,7 @@ class CHAOSGAME_API AChaosPlayerController : public APlayerController
 public:
 
 	void setHUDHealth(float health, float maxHealth);
+	virtual void OnPossess(APawn* InPawn) override;
 
 protected:
 	virtual void BeginPlay() override;
