@@ -62,6 +62,14 @@ void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (equippedWeapon && chaosCharacter)
 	{
+		equippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped); //remember to update enum states
+
+		const USkeletalMeshSocket* handSocket = chaosCharacter->GetMesh()->GetSocketByName(FName("RightHandSocket")); //get the socket
+
+		if (handSocket)
+		{
+			handSocket->AttachActor(equippedWeapon, chaosCharacter->GetMesh()); //attaches actor to the character
+		}
 		chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 		chaosCharacter->bUseControllerRotationYaw = true;
 	}

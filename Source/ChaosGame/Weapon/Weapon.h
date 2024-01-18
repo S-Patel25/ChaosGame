@@ -32,6 +32,8 @@ public:
 
 	virtual void Fire(const FVector& HitTarget); //reference is to avoid copy
 
+	void dropped();
+
 	//crosshairs for weapon
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)

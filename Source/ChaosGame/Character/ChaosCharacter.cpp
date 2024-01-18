@@ -119,6 +119,11 @@ void AChaosCharacter::OnRep_ReplicatedMovement()
 
 void AChaosCharacter::Elim()
 {
+	if (combat && combat->equippedWeapon)
+	{
+		combat->equippedWeapon->dropped(); //call drop function in elim method
+	}
+
 	multicastElim();
 
 	GetWorldTimerManager().SetTimer(
@@ -136,6 +141,8 @@ void AChaosCharacter::multicastElim_Implementation()
 	bElimmed = true;
 	playElimMontage(); //will play when character health is 0
 
+
+	//starting the dissolve effect 
 	if (dissolveMaterialInstance)
 	{
 		dynamicDissolveMI = UMaterialInstanceDynamic::Create(dissolveMaterialInstance, this);
@@ -147,6 +154,22 @@ void AChaosCharacter::multicastElim_Implementation()
 	}
 
 	startDissolve();
+
+	//after dissolve we disable movement
+	
+	GetCharacterMovement()->DisableMovement(); //movement stopped
+	GetCharacterMovement()->StopMovementImmediately(); //rotation stopped
+
+	if (chaosPlayerController)
+	{
+		DisableInput(chaosPlayerController); //disable weapon
+	}
+
+	//disable collision
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 }
 
 void AChaosCharacter::elimTimerFinished()

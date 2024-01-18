@@ -102,6 +102,18 @@ void AWeapon::SetWeaponState(EWeaponState state) //weapon properties setter
 	case EWeaponState::EWS_Equipped: //use switch to set diff properties on the enum states
 		showPickupWidget(false); //set widget to false since now equipped
 		getAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision); //no overlap events after equip
+		weaponMesh->SetSimulatePhysics(false);
+		weaponMesh->SetEnableGravity(false);
+		weaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); //setting collision and physics property for weapon
+		break;
+	case EWeaponState::EWS_Dropped:
+		if (HasAuthority())
+		{
+			getAreaSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		weaponMesh->SetSimulatePhysics(true);
+		weaponMesh->SetEnableGravity(true);
+		weaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); //setting collision and physics property for weapon
 		break;
 	}
 }
@@ -113,6 +125,14 @@ void AWeapon::OnRep_WeaponState()
 	case EWeaponState::EWS_Equipped: //use switch to set diff properties on the enum states
 		showPickupWidget(false);
 		areaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision); //so overlap events dont happen after weapon has been equipped
+		weaponMesh->SetSimulatePhysics(false);
+		weaponMesh->SetEnableGravity(false);
+		weaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	case EWeaponState::EWS_Dropped:
+		weaponMesh->SetSimulatePhysics(true);
+		weaponMesh->SetEnableGravity(true);
+		weaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); //setting collision and physics property for weapon
 		break;
 	}
 
@@ -153,5 +173,14 @@ void AWeapon::Fire(const FVector& HitTarget)
 
 		}
 	}
+}
+
+void AWeapon::dropped()
+{
+	SetWeaponState(EWeaponState::EWS_Dropped);
+	FDetachmentTransformRules detachRules(EDetachmentRule::KeepWorld, true);
+	weaponMesh->DetachFromComponent(detachRules);
+	SetOwner(nullptr); //so weapon has no owner
+
 }
 
