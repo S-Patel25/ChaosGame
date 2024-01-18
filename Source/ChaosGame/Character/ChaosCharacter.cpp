@@ -17,7 +17,10 @@
 #include "ChaosGame/ChaosGame.h"
 #include "ChaosGame/PlayerController/ChaosPlayerController.h"
 #include "ChaosGame/Gamemode/ChaosGameMode.h"
+#include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "Sound/SoundCue.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -135,6 +138,18 @@ void AChaosCharacter::Elim()
 
 }
 
+void AChaosCharacter::Destroyed()
+{
+	Super::Destroyed();
+
+	if (elimBotComponent)
+	{
+		elimBotComponent->DestroyComponent(); //so it doesnt stick around on both server and client (since destroyed works on all machines)
+	}
+
+
+}
+
 
 void AChaosCharacter::multicastElim_Implementation()
 {
@@ -170,6 +185,29 @@ void AChaosCharacter::multicastElim_Implementation()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+
+	//spawn elim bot
+
+	if (elimBotEffect)
+	{
+		FVector elimBotSpawnPoint(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.f); //spawn 200 units above player
+
+		elimBotComponent = UGameplayStatics::SpawnEmitterAtLocation( //spawn the particle system
+			GetWorld(),
+			elimBotEffect,
+			elimBotSpawnPoint,
+			GetActorRotation()
+		);
+	}
+
+	if (elimBotSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(
+			this,
+			elimBotSound,
+			GetActorLocation()
+		);
+	}
 }
 
 void AChaosCharacter::elimTimerFinished()
@@ -180,7 +218,6 @@ void AChaosCharacter::elimTimerFinished()
 	{
 		chaosGameMode->requestRespawn(this, Controller);
 	}
-
 }
 
 void AChaosCharacter::playHitReactMontage()

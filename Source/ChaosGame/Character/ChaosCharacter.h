@@ -42,6 +42,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void multicastElim();
 
+	virtual void Destroyed() override;
+
 	//to test weapon rotation
 
 	UPROPERTY(EditAnywhere, Category = "WeaponRotation")
@@ -52,6 +54,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "WeaponRotation")
 	float RightHandRotationPitch;
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -201,6 +204,18 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Elim") //this one is set
 	UMaterialInstance* dissolveMaterialInstance;
+
+	//ELIM BOT STUFF
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* elimBotEffect;
+
+	UPROPERTY(VisibleAnywhere)
+	UParticleSystemComponent* elimBotComponent;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* elimBotSound;
+
 
 public:
 
