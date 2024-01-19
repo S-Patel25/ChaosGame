@@ -244,6 +244,7 @@ void AChaosCharacter::pollInit()
 		if (chaosPlayerState)
 		{
 			chaosPlayerState->addToScore(0.f);
+			chaosPlayerState->addToDefeats(0);
 		}
 	}
 

@@ -177,6 +177,7 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
+	UPROPERTY()
 	class AChaosPlayerController* chaosPlayerController;
 
 	bool bElimmed = false;
@@ -219,6 +220,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* elimBotSound;
 
+	UPROPERTY()
 	class AChaosPlayerState* chaosPlayerState;
 
 

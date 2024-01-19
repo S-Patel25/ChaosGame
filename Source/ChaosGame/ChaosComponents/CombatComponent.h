@@ -53,8 +53,11 @@ protected:
 
 private:
 
+	UPROPERTY()
 	class AChaosCharacter* chaosCharacter;
+	UPROPERTY()
 	class AChaosPlayerController* controller;
+	UPROPERTY()
 	class AChaosHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon) //needs to be replicated so animations can be seen on client aswell as server

@@ -51,6 +51,22 @@ void AChaosPlayerController::setHUDScore(float score)
 	}
 }
 
+void AChaosPlayerController::setHUDDefeats(int32 defeats)
+{
+
+	chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+
+	bool bHUDValid = chaosHUD &&
+		chaosHUD->characterOverlay &&
+		chaosHUD->characterOverlay->DefeatAmount;
+
+	if (bHUDValid)
+	{
+		FString defeatText = FString::Printf(TEXT("%d"), defeats);
+		chaosHUD->characterOverlay->DefeatAmount->SetText(FText::FromString(defeatText));
+	}
+}
+
 void AChaosPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);

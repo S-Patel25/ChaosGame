@@ -18,6 +18,11 @@ void AChaosGameMode::playerEliminated(AChaosCharacter* elimmedCharacter, AChaosP
 		attackerPlayerState->addToScore(1.f); //when player gets elimmed
 	}
 
+	if (victimPlayerState)
+	{
+		victimPlayerState->addToDefeats(1); //same as attacker, but will count when player dies
+	}
+
 
 	if (elimmedCharacter)
 	{

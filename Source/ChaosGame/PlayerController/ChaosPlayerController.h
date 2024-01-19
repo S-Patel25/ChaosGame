@@ -19,11 +19,14 @@ public:
 
 	void setHUDHealth(float health, float maxHealth);
 	void setHUDScore(float score);
+	void setHUDDefeats(int32 defeats);
 	virtual void OnPossess(APawn* InPawn) override;
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
+
+	UPROPERTY()
 	class AChaosHUD* chaosHUD;
 };
