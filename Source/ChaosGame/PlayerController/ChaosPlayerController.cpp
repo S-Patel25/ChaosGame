@@ -36,6 +36,21 @@ void AChaosPlayerController::setHUDHealth(float health, float maxHealth)
 	
 }
 
+void AChaosPlayerController::setHUDScore(float score)
+{
+	chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+
+	bool bHUDValid = chaosHUD &&
+		chaosHUD->characterOverlay &&
+		chaosHUD->characterOverlay->ScoreAmount;
+
+	if (bHUDValid)
+	{
+		FString scoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(score));
+		chaosHUD->characterOverlay->ScoreAmount->SetText(FText::FromString(scoreText));
+	}
+}
+
 void AChaosPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);

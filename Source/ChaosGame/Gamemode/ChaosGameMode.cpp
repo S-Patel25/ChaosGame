@@ -6,9 +6,19 @@
 #include "ChaosGame/PlayerController/ChaosPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
+#include "ChaosGame/PlayerState/ChaosPlayerState.h"
 
 void AChaosGameMode::playerEliminated(AChaosCharacter* elimmedCharacter, AChaosPlayerController* victimController, AChaosPlayerController* attackerController)
 {
+	AChaosPlayerState* attackerPlayerState = attackerController ? Cast<AChaosPlayerState>(attackerController->PlayerState) : nullptr; //casts to get attacker and victims player states
+	AChaosPlayerState* victimPlayerState = victimController ? Cast<AChaosPlayerState>(victimController->PlayerState) : nullptr;
+
+	if (attackerPlayerState && attackerPlayerState != victimPlayerState)
+	{
+		attackerPlayerState->addToScore(1.f); //when player gets elimmed
+	}
+
+
 	if (elimmedCharacter)
 	{
 		elimmedCharacter->Elim();

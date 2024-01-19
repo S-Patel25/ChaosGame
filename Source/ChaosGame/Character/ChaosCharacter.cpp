@@ -21,6 +21,7 @@
 #include "TimerManager.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "ChaosGame/PlayerState/ChaosPlayerState.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -232,6 +233,20 @@ void AChaosCharacter::playHitReactMontage()
 		FName sectionName("FromFront");
 		animInstance->Montage_JumpToSection(sectionName);
 	}
+}
+
+void AChaosCharacter::pollInit()
+{
+	if (chaosPlayerState == nullptr)
+	{
+		chaosPlayerState = GetPlayerState<AChaosPlayerState>(); //function returns player state (no need to cast)
+
+		if (chaosPlayerState)
+		{
+			chaosPlayerState->addToScore(0.f);
+		}
+	}
+
 }
 
 void AChaosCharacter::recieveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
@@ -495,6 +510,7 @@ void AChaosCharacter::Tick(float DeltaTime)
 	}
 
 	hideCameraIfCharacterClose();
+	pollInit(); //can't do in begin play as player state is not intialized by then, so tick will take care of that
 }
 
 

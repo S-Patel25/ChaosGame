@@ -63,6 +63,9 @@ protected:
 
 	void playHitReactMontage();
 
+	//HUD intializing
+	void pollInit();
+
 	UFUNCTION() //dont forget UFUNCTION macro for callbacks
 	void recieveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser); //specific function callback
 
@@ -215,6 +218,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* elimBotSound;
+
+	class AChaosPlayerState* chaosPlayerState;
 
 
 public:
