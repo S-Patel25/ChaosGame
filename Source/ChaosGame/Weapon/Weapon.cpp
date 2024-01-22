@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Casing.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "ChaosGame/PlayerController/ChaosPlayerController.h"
 
 
 AWeapon::AWeapon()
@@ -66,8 +67,38 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, weaponState);
+	DOREPLIFETIME(AWeapon, Ammo);
 
 
+}
+
+void AWeapon::setHUDAmmo()
+{
+	chaosOwnerCharacter = chaosOwnerCharacter == nullptr ? Cast<AChaosCharacter>(GetOwner()) : chaosOwnerCharacter;
+	if (chaosOwnerCharacter)
+	{
+		chaosOwnerController = chaosOwnerController == nullptr ? Cast<AChaosPlayerController>(chaosOwnerCharacter->Controller) : chaosOwnerController;
+		if (chaosOwnerController)
+		{
+			chaosOwnerController->setHUDWeaponAmmo(Ammo);
+		}
+	}
+
+}
+
+void AWeapon::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+
+	if (Owner == nullptr)
+	{
+		chaosOwnerCharacter = nullptr;
+		chaosOwnerController = nullptr;
+	}
+	else
+	{
+		setHUDAmmo();
+	}
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -91,6 +122,17 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		chaosCharacter->SetOverlappingWeapon(nullptr); //set to null once done overlap
 	}
 
+}
+
+void AWeapon::OnRep_Ammo()
+{
+	setHUDAmmo();
+}
+
+void AWeapon::spendRound()
+{
+	--Ammo;
+	setHUDAmmo();
 }
 
 void AWeapon::SetWeaponState(EWeaponState state) //weapon properties setter
@@ -173,6 +215,7 @@ void AWeapon::Fire(const FVector& HitTarget)
 
 		}
 	}
+	spendRound();
 }
 
 void AWeapon::dropped()
@@ -181,6 +224,9 @@ void AWeapon::dropped()
 	FDetachmentTransformRules detachRules(EDetachmentRule::KeepWorld, true);
 	weaponMesh->DetachFromComponent(detachRules);
 	SetOwner(nullptr); //so weapon has no owner
+
+	chaosOwnerCharacter = nullptr;
+	chaosOwnerController = nullptr;
 
 }
 

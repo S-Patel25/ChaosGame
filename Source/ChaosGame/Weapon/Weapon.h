@@ -28,6 +28,10 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void OnRep_Owner() override;
+	
+	void setHUDAmmo();
+
 	void showPickupWidget(bool bShowWidget);
 
 	virtual void Fire(const FVector& HitTarget); //reference is to avoid copy
@@ -110,6 +114,24 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float zoomInterpSpeed = 20.f;
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	int32 Ammo;
+
+	UFUNCTION()
+	void OnRep_Ammo();
+
+	void spendRound();
+
+	UPROPERTY(EditAnywhere)
+	int32 magCapacity;
+
+	UPROPERTY()
+	class AChaosCharacter* chaosOwnerCharacter;
+
+	UPROPERTY()
+	class AChaosPlayerController* chaosOwnerController;
+
 
 public:	
 	void SetWeaponState(EWeaponState state); //since enum is priv

@@ -67,6 +67,21 @@ void AChaosPlayerController::setHUDDefeats(int32 defeats)
 	}
 }
 
+void AChaosPlayerController::setHUDWeaponAmmo(int32 Ammo)
+{
+	chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+
+	bool bHUDValid = chaosHUD &&
+		chaosHUD->characterOverlay &&
+		chaosHUD->characterOverlay->WeapAmmoAmount;
+
+	if (bHUDValid)
+	{
+		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
+		chaosHUD->characterOverlay->WeapAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+}
+
 void AChaosPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
