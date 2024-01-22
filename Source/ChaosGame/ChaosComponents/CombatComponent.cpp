@@ -88,8 +88,8 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
-	//if (bCanFire)
-	//{
+	if (canFire()) //ammo check
+	{
 		//bCanFire = false;
 		ServerFire(hitTarget); //calling server RPC
 		if (equippedWeapon)
@@ -97,7 +97,7 @@ void UCombatComponent::Fire()
 			crosshairShootFactor = 0.75f; //better to use = then plus as crosshairs could get bigger and bigger (can also use clamp)
 		}
 		startFireTimer(); //start here
-	//}
+	}
 }
 
 void UCombatComponent::traceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -279,6 +279,13 @@ void UCombatComponent::fireTimerFinished()
 		Fire();
 	}
 
+}
+
+bool UCombatComponent::canFire()
+{
+	if (equippedWeapon == nullptr) return false;
+
+	return !equippedWeapon->isEmpty(); //checking if ammo empty so we can't fire into negative ammo 
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)

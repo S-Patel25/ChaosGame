@@ -109,6 +109,8 @@ private:
 	void startFireTimer();
 	void fireTimerFinished();
 
+	bool canFire();
+
 public:	
 	
 };

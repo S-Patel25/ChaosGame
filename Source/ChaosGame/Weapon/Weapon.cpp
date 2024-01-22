@@ -68,8 +68,6 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, weaponState);
 	DOREPLIFETIME(AWeapon, Ammo);
-
-
 }
 
 void AWeapon::setHUDAmmo()
@@ -131,7 +129,7 @@ void AWeapon::OnRep_Ammo()
 
 void AWeapon::spendRound()
 {
-	--Ammo;
+	Ammo = FMath::Clamp(Ammo - 1, 0, magCapacity); //making sure ammo can't go below zero or above mag capacity
 	setHUDAmmo();
 }
 
@@ -158,6 +156,11 @@ void AWeapon::SetWeaponState(EWeaponState state) //weapon properties setter
 		weaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); //setting collision and physics property for weapon
 		break;
 	}
+}
+
+bool AWeapon::isEmpty()
+{
+	return Ammo <= 0;
 }
 
 void AWeapon::OnRep_WeaponState()
