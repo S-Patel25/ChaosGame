@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "WeaponTypes.h"
 #include "Weapon.generated.h"
 
 
@@ -132,6 +133,9 @@ private:
 	UPROPERTY()
 	class AChaosPlayerController* chaosOwnerController;
 
+	UPROPERTY(EditAnywhere)
+	EWeaponType weaponType;
+
 
 public:	
 	void SetWeaponState(EWeaponState state); //since enum is priv
@@ -140,4 +144,5 @@ public:
 	FORCEINLINE float getZoomedFOV() const { return zoomedFOV; }
 	FORCEINLINE float getZoomIntepSpeed() const { return zoomInterpSpeed; }
 	bool isEmpty();
+	FORCEINLINE EWeaponType GetWeaponType() const { return weaponType; }
 };

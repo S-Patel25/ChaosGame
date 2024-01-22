@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "ChaosGame/HUD/ChaosHUD.h"
+#include "ChaosGame/Weapon/WeaponTypes.h"
 #include "CombatComponent.generated.h"
 
 class AWeapon;
@@ -110,6 +111,19 @@ private:
 	void fireTimerFinished();
 
 	bool canFire();
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_CarriedAmmo)
+	int32 carriedAmmo;
+
+	UFUNCTION()
+	void OnRep_CarriedAmmo();
+
+	TMap<EWeaponType, int32> carriedAmmoMap; //using a map to map ammo to weapon type
+
+	UPROPERTY(EditAnywhere)
+	int32 startingARAmmo = 45; //do for each weapon type
+
+	void intializeCarriedAmmo();
 
 public:	
 	

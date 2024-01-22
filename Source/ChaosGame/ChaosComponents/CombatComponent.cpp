@@ -43,6 +43,11 @@ void UCombatComponent::BeginPlay()
 			defaultFOV = chaosCharacter->getFollowCamera()->FieldOfView;
 			currentFOV = defaultFOV;
 		}
+
+		if (chaosCharacter->HasAuthority())
+		{
+			intializeCarriedAmmo();
+		}
 	}
 }
 
@@ -288,6 +293,22 @@ bool UCombatComponent::canFire()
 	return !equippedWeapon->isEmpty(); //checking if ammo empty so we can't fire into negative ammo 
 }
 
+void UCombatComponent::OnRep_CarriedAmmo()
+{
+	controller = controller == nullptr ? Cast<AChaosPlayerController>(chaosCharacter->Controller) : controller;
+
+	if (controller)
+	{
+		controller->setHUDCarriedAmmo(carriedAmmo); //display 
+	}
+}
+
+void UCombatComponent::intializeCarriedAmmo()
+{
+	carriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, startingARAmmo); //emplace gets rid of temp vals
+
+}
+
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	MulticastFire(TraceHitTarget); //calling rom the server runs on server AND all clients
@@ -338,6 +359,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCombatComponent, equippedWeapon); //replicate weapon
 	DOREPLIFETIME(UCombatComponent, bAiming);
+	DOREPLIFETIME_CONDITION(UCombatComponent, carriedAmmo, COND_OwnerOnly); //only owner cares about the max ammo
 }
 
 void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
@@ -355,6 +377,19 @@ void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 	}
 
 	equippedWeapon->SetOwner(chaosCharacter); //character now is owner of weapon class as we atached and equipped
+	equippedWeapon->setHUDAmmo();
+
+	if (carriedAmmoMap.Contains(equippedWeapon->GetWeaponType())) //make sure its the correct weapon type
+	{
+		carriedAmmo = carriedAmmoMap[equippedWeapon->GetWeaponType()]; //setting carried ammo
+	}
+
+	controller = controller == nullptr ? Cast<AChaosPlayerController>(chaosCharacter->Controller) : controller;
+
+	if (controller)
+	{
+		controller->setHUDCarriedAmmo(carriedAmmo); //display 
+	}
 
 	chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	chaosCharacter->bUseControllerRotationYaw = true; //set in server, make sure to use rep notify for client aswell
