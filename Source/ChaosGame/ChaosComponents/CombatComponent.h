@@ -63,6 +63,8 @@ protected:
 
 	void handleReload();
 
+	int32 amountToReload();
+
 private:
 
 	UPROPERTY()
@@ -141,6 +143,9 @@ private:
 
 	UFUNCTION()
 	void OnRep_CombatState();
+
+	void updateAmmoValues();
+
 
 public:	
 	

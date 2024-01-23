@@ -39,6 +39,8 @@ public:
 
 	void dropped();
 
+	void addAmmo(int32 ammoToAdd);
+
 	//crosshairs for weapon
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -145,4 +147,6 @@ public:
 	FORCEINLINE float getZoomIntepSpeed() const { return zoomInterpSpeed; }
 	bool isEmpty();
 	FORCEINLINE EWeaponType GetWeaponType() const { return weaponType; }
+	FORCEINLINE int32 getAmmo() const { return Ammo;  }
+	FORCEINLINE int32 getMagCapacity() const { return magCapacity; }
 };

@@ -243,14 +243,51 @@ void UCombatComponent::handleReload()
 	chaosCharacter->playReloadMontage();
 }
 
+int32 UCombatComponent::amountToReload()
+{
+	if (equippedWeapon == nullptr) return 0;
+
+	int32 roomInMag = equippedWeapon->getMagCapacity() - equippedWeapon->getAmmo(); //how much is left in the magazine
+	
+	if (carriedAmmoMap.Contains(equippedWeapon->GetWeaponType()))
+	{
+		int32 amountCarried = carriedAmmoMap[equippedWeapon->GetWeaponType()];
+		int32 least = FMath::Min(roomInMag, amountCarried); //so it doesn't use the higher amount over the roominmag
+		return FMath::Clamp(roomInMag, 0, least);
+	}
+
+	return 0;
+}
+
 void UCombatComponent::serverReload_Implementation()
 {
-	if (chaosCharacter == nullptr) return;
+	if (chaosCharacter == nullptr || equippedWeapon == nullptr) return;
 
 	combatState = ECombatState::ECS_Reloading;
-
 	handleReload();
 
+}
+
+void UCombatComponent::updateAmmoValues()
+{
+	if (chaosCharacter == nullptr || equippedWeapon == nullptr) return;
+
+	int32 reloadAmount = amountToReload();
+
+	if (carriedAmmoMap.Contains(equippedWeapon->GetWeaponType()))
+	{
+		carriedAmmoMap[equippedWeapon->GetWeaponType()] -= reloadAmount;
+		carriedAmmo = carriedAmmoMap[equippedWeapon->GetWeaponType()]; //update ammo
+	}
+
+	controller = controller == nullptr ? Cast<AChaosPlayerController>(chaosCharacter->Controller) : controller;
+
+	if (controller)
+	{
+		controller->setHUDCarriedAmmo(carriedAmmo);
+	}
+
+	equippedWeapon->addAmmo(-reloadAmount);
 }
 
 void UCombatComponent::OnRep_CombatState()
@@ -419,11 +456,6 @@ void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 
 	controller = controller == nullptr ? Cast<AChaosPlayerController>(chaosCharacter->Controller) : controller;
 
-	if (controller)
-	{
-		controller->setHUDCarriedAmmo(carriedAmmo); //display 
-	}
-
 	chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	chaosCharacter->bUseControllerRotationYaw = true; //set in server, make sure to use rep notify for client aswell
 }
@@ -444,6 +476,7 @@ void UCombatComponent::finishReloading()
 	if (chaosCharacter->HasAuthority())
 	{
 		combatState = ECombatState::ECS_Unoccupied;
+		updateAmmoValues();
 	}
 
 	if (bFireButtonPressed)

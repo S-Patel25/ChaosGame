@@ -233,3 +233,9 @@ void AWeapon::dropped()
 
 }
 
+void AWeapon::addAmmo(int32 ammoToAdd)
+{
+	Ammo = FMath::Clamp(Ammo - ammoToAdd, 0, magCapacity);
+	setHUDAmmo();
+}
+
