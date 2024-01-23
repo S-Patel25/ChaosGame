@@ -22,6 +22,7 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "ChaosGame/PlayerState/ChaosPlayerState.h"
+#include "ChaosGame/Weapon/WeaponTypes.h"
 
 // Sets default values
 AChaosCharacter::AChaosCharacter()
@@ -112,6 +113,29 @@ void AChaosCharacter::playElimMontage()
 		animInstance->Montage_Play(elimMontage); //play montage
 	}
 
+}
+
+void AChaosCharacter::playReloadMontage()
+{
+	if (combat == nullptr || combat->equippedWeapon == nullptr) return;
+
+	UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+
+	if (animInstance && reloadMontage)
+	{
+		animInstance->Montage_Play(reloadMontage); //play montage
+
+		FName sectionName;
+
+		switch (combat->equippedWeapon->GetWeaponType())
+		{
+			case EWeaponType::EWT_AssaultRifle: //montage jump based on weapon type
+				sectionName = FName("Rifle");
+				break;
+		}
+
+		animInstance->Montage_JumpToSection(sectionName);
+	}
 }
 
 void AChaosCharacter::OnRep_ReplicatedMovement()
@@ -382,6 +406,14 @@ void AChaosCharacter::FireReleased()
 	if (combat)
 	{
 		combat->FireButtonPressed(false);
+	}
+}
+
+void AChaosCharacter::ReloadPressed()
+{
+	if (combat)
+	{
+		combat->Reload();
 	}
 }
 
@@ -659,6 +691,7 @@ void AChaosCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		enhancedInput->BindAction(aimAction, ETriggerEvent::Completed, this, &AChaosCharacter::AimReleased);
 		enhancedInput->BindAction(fireAction, ETriggerEvent::Started, this, &AChaosCharacter::FirePressed);
 		enhancedInput->BindAction(fireAction, ETriggerEvent::Completed, this, &AChaosCharacter::FireReleased);
+		enhancedInput->BindAction(reloadAction, ETriggerEvent::Triggered, this, &AChaosCharacter::ReloadPressed);
 	}
 }
 

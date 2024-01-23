@@ -35,6 +35,8 @@ public:
 
 	void playElimMontage();
 
+	void playReloadMontage();
+
 	virtual void OnRep_ReplicatedMovement() override; //to have the sim proxy update faster
 
 	void Elim(); //server elim, one below is for client (hence multicast)
@@ -95,6 +97,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* fireAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* reloadAction;
+
 
 	//enhanced input stuff
 	void Movement(const FInputActionValue& Value);
@@ -105,6 +110,7 @@ protected:
 	void AimReleased();
 	void FirePressed();
 	void FireReleased();
+	void ReloadPressed();
 
 
 	void AimOffset(float DeltaTime);
@@ -142,6 +148,8 @@ private:
 	ETurningInPlace turningInPlace;
 	void TurnInPlace(float DeltaTime);
 
+	//MONTAGE STUFF
+
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* fireWeaponMontage;
 
@@ -150,6 +158,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* elimMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* reloadMontage;
 
 	void hideCameraIfCharacterClose();
 

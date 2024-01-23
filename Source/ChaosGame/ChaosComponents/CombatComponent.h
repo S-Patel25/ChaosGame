@@ -26,6 +26,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void equipWeapon(AWeapon* weaponToEquip);
 
+	void Reload();
+
 protected:
 	virtual void BeginPlay() override;
 	void SetAiming(bool bIsAiming);
@@ -51,6 +53,9 @@ protected:
 	void traceUnderCrosshairs(FHitResult& TraceHitResult); //making a function for the hit target
 
 	void setHUDCrosshairs(float DeltaTime);
+
+	UFUNCTION(Server, Reliable)
+	void serverReload();
 
 private:
 

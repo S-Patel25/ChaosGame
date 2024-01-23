@@ -238,6 +238,14 @@ void UCombatComponent::setHUDCrosshairs(float DeltaTime)
 	
 }
 
+void UCombatComponent::serverReload_Implementation()
+{
+	if (chaosCharacter == nullptr) return;
+
+	chaosCharacter->playReloadMontage();
+
+}
+
 void UCombatComponent::interpFOV(float DeltaTime)
 {
 	if (equippedWeapon == nullptr) return;
@@ -393,5 +401,14 @@ void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 
 	chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	chaosCharacter->bUseControllerRotationYaw = true; //set in server, make sure to use rep notify for client aswell
+}
+
+void UCombatComponent::Reload()
+{
+	if(carriedAmmo)
+	{
+		serverReload(); //save bandwith by only calling rpc when reload is needed
+	}
+
 }
 
