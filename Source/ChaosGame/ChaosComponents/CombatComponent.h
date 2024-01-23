@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "ChaosGame/HUD/ChaosHUD.h"
 #include "ChaosGame/Weapon/WeaponTypes.h"
+#include "ChaosGame/ChaosTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
 class AWeapon;
@@ -27,6 +28,9 @@ public:
 	void equipWeapon(AWeapon* weaponToEquip);
 
 	void Reload();
+	
+	UFUNCTION(BlueprintCallable)
+	void finishReloading();
 
 protected:
 	virtual void BeginPlay() override;
@@ -56,6 +60,8 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void serverReload();
+
+	void handleReload();
 
 private:
 
@@ -129,6 +135,12 @@ private:
 	int32 startingARAmmo = 45; //do for each weapon type
 
 	void intializeCarriedAmmo();
+
+	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+	ECombatState combatState = ECombatState::ECS_Unoccupied;
+
+	UFUNCTION()
+	void OnRep_CombatState();
 
 public:	
 	

@@ -9,6 +9,7 @@
 #include "ChaosGame/ChaosTypes/TurningInPlace.h"
 #include "ChaosGame/Interfaces/InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
+#include "ChaosGame/ChaosTypes/CombatState.h"
 #include "ChaosCharacter.generated.h"
 
 
@@ -134,7 +135,7 @@ private:
 	UFUNCTION()
 	void OnRep_overlappingWeapon(AWeapon* lastWeapon); //rep notifies (only get called from server to client, show changges wont show on server)
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	class UCombatComponent* combat;
 
 	UFUNCTION(Server, Reliable) //reliable means function will and needs be guarnteed on the remote machine (use sparingly)
@@ -250,4 +251,5 @@ public:
 	FORCEINLINE bool isElimmed() const { return bElimmed; }
 	FORCEINLINE float getHealth() const { return health; }
 	FORCEINLINE float getMaxHealth() const { return maxHealth; }
+	ECombatState getCombatState() const;
 };	

@@ -5,6 +5,7 @@
 #include "ChaosCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "ChaosGame/ChaosTypes/CombatState.h"
 #include "ChaosGame/Weapon/Weapon.h"
 
 void UChaosAnimInstance::NativeInitializeAnimation()
@@ -88,6 +89,7 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 			rightHandRotation.Pitch += chaosCharacter->RightHandRotationPitch;
 			rightHandRotation.Yaw += chaosCharacter->RightHandRotationYaw;
 		}
-	
 	}
+
+	bUseFABRIK = chaosCharacter->getCombatState() != ECombatState::ECS_Reloading; //only use FABRIK when not reloading
 };

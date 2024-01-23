@@ -238,11 +238,29 @@ void UCombatComponent::setHUDCrosshairs(float DeltaTime)
 	
 }
 
+void UCombatComponent::handleReload()
+{
+	chaosCharacter->playReloadMontage();
+}
+
 void UCombatComponent::serverReload_Implementation()
 {
 	if (chaosCharacter == nullptr) return;
 
-	chaosCharacter->playReloadMontage();
+	combatState = ECombatState::ECS_Reloading;
+
+	handleReload();
+
+}
+
+void UCombatComponent::OnRep_CombatState()
+{
+	switch (combatState)
+	{
+	case ECombatState::ECS_Reloading:
+		handleReload();
+		break;
+	}
 
 }
 
@@ -368,6 +386,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, equippedWeapon); //replicate weapon
 	DOREPLIFETIME(UCombatComponent, bAiming);
 	DOREPLIFETIME_CONDITION(UCombatComponent, carriedAmmo, COND_OwnerOnly); //only owner cares about the max ammo
+	DOREPLIFETIME(UCombatComponent, combatState);
 }
 
 void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
@@ -405,9 +424,20 @@ void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 
 void UCombatComponent::Reload()
 {
-	if(carriedAmmo)
+	if(carriedAmmo > 0 && combatState != ECombatState::ECS_Reloading) //so we cant spam
 	{
 		serverReload(); //save bandwith by only calling rpc when reload is needed
+	}
+
+}
+
+void UCombatComponent::finishReloading()
+{
+	if (chaosCharacter == nullptr) return;
+	
+	if (chaosCharacter->HasAuthority())
+	{
+		combatState = ECombatState::ECS_Unoccupied;
 	}
 
 }

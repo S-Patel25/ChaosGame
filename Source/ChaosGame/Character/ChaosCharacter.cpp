@@ -718,3 +718,10 @@ FVector AChaosCharacter::getHitTarget() const
 
 	return combat->hitTarget;
 }
+
+ECombatState AChaosCharacter::getCombatState() const
+{
+	if (combat == nullptr) return ECombatState::ECS_MAX;
+
+	return combat->combatState;
+}
