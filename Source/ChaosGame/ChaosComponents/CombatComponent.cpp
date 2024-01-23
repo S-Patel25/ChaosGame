@@ -260,6 +260,12 @@ void UCombatComponent::OnRep_CombatState()
 	case ECombatState::ECS_Reloading:
 		handleReload();
 		break;
+	case ECombatState::ECS_Unoccupied:
+		if (bFireButtonPressed)
+		{
+			Fire();
+		}
+		break;
 	}
 
 }
@@ -316,7 +322,7 @@ bool UCombatComponent::canFire()
 {
 	if (equippedWeapon == nullptr) return false;
 
-	return !equippedWeapon->isEmpty(); //checking if ammo empty so we can't fire into negative ammo 
+	return !equippedWeapon->isEmpty() && combatState == ECombatState::ECS_Unoccupied; //checking if ammo empty so we can't fire into negative ammo and also not reloading
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()
@@ -344,7 +350,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 {
 	if (equippedWeapon == nullptr) return;
 
-	if (chaosCharacter)
+	if (chaosCharacter && combatState == ECombatState::ECS_Unoccupied)
 	{
 		chaosCharacter->playFireMontage(bAiming);
 		equippedWeapon->Fire(TraceHitTarget);
@@ -438,6 +444,11 @@ void UCombatComponent::finishReloading()
 	if (chaosCharacter->HasAuthority())
 	{
 		combatState = ECombatState::ECS_Unoccupied;
+	}
+
+	if (bFireButtonPressed)
+	{
+		Fire();
 	}
 
 }
