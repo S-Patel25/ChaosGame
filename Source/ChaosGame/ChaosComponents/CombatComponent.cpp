@@ -13,6 +13,7 @@
 #include "ChaosGame/PlayerController/ChaosPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "TimerManager.h"
+#include "Sound/SoundCue.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -77,6 +78,15 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		}
 		chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 		chaosCharacter->bUseControllerRotationYaw = true;
+
+		if (equippedWeapon->equipSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				equippedWeapon->equipSound,
+				chaosCharacter->GetActorLocation()
+			);
+		}
 	}
 }
 
@@ -456,8 +466,18 @@ void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 
 	controller = controller == nullptr ? Cast<AChaosPlayerController>(chaosCharacter->Controller) : controller;
 
+	if (equippedWeapon->equipSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			equippedWeapon->equipSound,
+			chaosCharacter->GetActorLocation()
+		);
+	}
+
 	chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	chaosCharacter->bUseControllerRotationYaw = true; //set in server, make sure to use rep notify for client aswell
+
 }
 
 void UCombatComponent::Reload()
