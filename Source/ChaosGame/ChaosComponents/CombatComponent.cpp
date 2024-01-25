@@ -363,6 +363,11 @@ void UCombatComponent::fireTimerFinished()
 		Fire();
 	}
 
+	if (equippedWeapon->isEmpty()) //auto reload
+	{
+		Reload();
+	}
+
 }
 
 bool UCombatComponent::canFire()
@@ -473,6 +478,11 @@ void UCombatComponent::equipWeapon(AWeapon* weaponToEquip)
 			equippedWeapon->equipSound,
 			chaosCharacter->GetActorLocation()
 		);
+	}
+
+	if (equippedWeapon->isEmpty())
+	{
+		Reload();
 	}
 
 	chaosCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
