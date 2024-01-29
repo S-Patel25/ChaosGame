@@ -26,10 +26,30 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 
+	virtual float getServerTime(); //synced with world time
+
+	virtual void ReceivedPlayer() override; //so we can sync the client and server as soon as possible
+
 protected:
 	virtual void BeginPlay() override;
 
 	void setHUDTime();
+
+	//ROUND TRIP TIME CODE STUFF(sync time between client and server)
+
+	UFUNCTION(Server, Reliable) //requests current server time
+	void ServerRequestServerTime(float timeOfClientRequest);
+
+	UFUNCTION(Client, Reliable)
+	void ClientReportServerTime(float timeOfClientRequest, float timeServerRecievedClientRequest); //sends back server time to client
+
+	float clientServerDelta = 0.f; //difference between client and server time
+
+	UPROPERTY(EditAnywhere, Category = "Time")
+	float timeSyncFrequency = 5.f;
+
+	float timeSyncRunningTime = 0.f;
+	void checkTimeSync(float DeltaTime);
 
 private:
 

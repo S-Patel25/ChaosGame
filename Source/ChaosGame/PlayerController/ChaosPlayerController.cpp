@@ -20,19 +20,66 @@ void AChaosPlayerController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	setHUDTime();
+
+	checkTimeSync(DeltaTime);
+}
+
+
+void AChaosPlayerController::checkTimeSync(float DeltaTime)
+{
+	timeSyncRunningTime += DeltaTime;
+
+	if (IsLocalController() && timeSyncRunningTime > timeSyncFrequency) //to prevent drifting of times
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+		timeSyncRunningTime = 0.f; //reset
+	}
 }
 
 
 void AChaosPlayerController::setHUDTime() //should be done in player gamemode, just doing this for testing for now
 {
-	uint32 secondsLeft = FMath::CeilToInt(matchTime - GetWorld()->GetTimeSeconds()); 
+	uint32 secondsLeft = FMath::CeilToInt(matchTime - getServerTime()); 
 
 	if (countdownInt != secondsLeft)
 	{
-		setHUDMatchCountdown(matchTime - GetWorld()->GetTimeSeconds());
+		setHUDMatchCountdown(matchTime - getServerTime());
 	}
 
 	countdownInt = secondsLeft;
+
+}
+
+void AChaosPlayerController::ServerRequestServerTime_Implementation(float timeOfClientRequest)
+{
+	float serverTimeOfReceipt = GetWorld()->GetTimeSeconds();
+	ClientReportServerTime(timeOfClientRequest, serverTimeOfReceipt); //send client the server time
+}
+
+void AChaosPlayerController::ClientReportServerTime_Implementation(float timeOfClientRequest, float timeServerRecievedClientRequest)
+{
+	float roundTripTime = GetWorld()->GetTimeSeconds() - timeOfClientRequest;
+	float currentServerTime = timeServerRecievedClientRequest + (0.5f * roundTripTime);
+
+	clientServerDelta = currentServerTime - GetWorld()->GetTimeSeconds();
+}
+
+float AChaosPlayerController::getServerTime()
+{
+	if (HasAuthority()) return GetWorld()->GetTimeSeconds();
+
+
+	return GetWorld()->GetTimeSeconds() + clientServerDelta;
+}
+
+void AChaosPlayerController::ReceivedPlayer()
+{
+	Super::ReceivedPlayer();
+
+	if (IsLocalController())
+	{
+		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+	}
 
 }
 
@@ -53,8 +100,6 @@ void AChaosPlayerController::setHUDHealth(float health, float maxHealth)
 
 		chaosHUD->characterOverlay->HealthText->SetText(FText::FromString(healthText));
 	}
-
-	
 }
 
 void AChaosPlayerController::setHUDScore(float score)
