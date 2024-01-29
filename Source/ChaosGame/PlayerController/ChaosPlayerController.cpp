@@ -15,6 +15,27 @@ void AChaosPlayerController::BeginPlay()
 	chaosHUD = Cast<AChaosHUD>(GetHUD()); //casting as gethud returns AHUD
 }
 
+void AChaosPlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	setHUDTime();
+}
+
+
+void AChaosPlayerController::setHUDTime() //should be done in player gamemode, just doing this for testing for now
+{
+	uint32 secondsLeft = FMath::CeilToInt(matchTime - GetWorld()->GetTimeSeconds()); 
+
+	if (countdownInt != secondsLeft)
+	{
+		setHUDMatchCountdown(matchTime - GetWorld()->GetTimeSeconds());
+	}
+
+	countdownInt = secondsLeft;
+
+}
+
 void AChaosPlayerController::setHUDHealth(float health, float maxHealth)
 {
 	chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD; //efficient way to check
@@ -96,6 +117,24 @@ void AChaosPlayerController::setHUDCarriedAmmo(int32 Ammo)
 		chaosHUD->characterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
 	}
 
+}
+
+void AChaosPlayerController::setHUDMatchCountdown(float countdownTime)
+{
+	chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+
+	bool bHUDValid = chaosHUD &&
+		chaosHUD->characterOverlay &&
+		chaosHUD->characterOverlay->MatchCountdownText;
+
+	if (bHUDValid)
+	{
+		int32 minutes = FMath::FloorToInt(countdownTime / 60.f); //this will get minutes
+		int32 seconds = countdownTime - minutes * 60; //gets seconds
+
+		FString countdownText = FString::Printf(TEXT("%02d:%02d"), minutes, seconds); //will show time with correct formatting (10:03), for example
+		chaosHUD->characterOverlay->MatchCountdownText->SetText(FText::FromString(countdownText));
+	}
 }
 
 void AChaosPlayerController::OnPossess(APawn* InPawn)

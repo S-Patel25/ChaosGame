@@ -22,13 +22,20 @@ public:
 	void setHUDDefeats(int32 defeats);
 	void setHUDWeaponAmmo(int32 Ammo);
 	void setHUDCarriedAmmo(int32 Ammo);
+	void setHUDMatchCountdown(float countdownTime);
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	virtual void BeginPlay() override;
+
+	void setHUDTime();
 
 private:
 
 	UPROPERTY()
 	class AChaosHUD* chaosHUD;
+
+	float matchTime = 120.f;
+	uint32 countdownInt = 0.f;
 };
