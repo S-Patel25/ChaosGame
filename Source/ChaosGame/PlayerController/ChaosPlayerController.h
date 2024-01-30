@@ -25,15 +25,21 @@ public:
 	void setHUDMatchCountdown(float countdownTime);
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual float getServerTime(); //synced with world time
 
 	virtual void ReceivedPlayer() override; //so we can sync the client and server as soon as possible
 
+	void onMatchStateSet(FName state);
+
+
 protected:
 	virtual void BeginPlay() override;
 
 	void setHUDTime();
+
+	void pollInit(); //initialize stuff
 
 	//ROUND TRIP TIME CODE STUFF(sync time between client and server)
 
@@ -58,4 +64,23 @@ private:
 
 	float matchTime = 120.f;
 	uint32 countdownInt = 0.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_matchState)
+	FName matchState;
+
+	UFUNCTION()
+	void OnRep_matchState();
+
+	UPROPERTY()
+	class UCharacterOverlay* characterOverlay;
+
+	bool bIntializeCharacterOverlay = false;
+
+	float HUDHealth;
+	float HUDMaxHealth;
+	float HUDScore;
+	int32 HUDDefeats;
+
+
+
 };

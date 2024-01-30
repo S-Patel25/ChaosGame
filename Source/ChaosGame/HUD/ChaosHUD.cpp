@@ -9,8 +9,6 @@ void AChaosHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	addCharacterOverlay();
-
 }
 
 void AChaosHUD::addCharacterOverlay()

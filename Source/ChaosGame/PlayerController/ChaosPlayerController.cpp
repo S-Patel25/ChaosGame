@@ -7,6 +7,8 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "ChaosGame/Character/ChaosCharacter.h"
+#include "Net/UnrealNetwork.h"
+#include "ChaosGame/Gamemode/ChaosGameMode.h"
 
 void AChaosPlayerController::BeginPlay()
 {
@@ -22,6 +24,15 @@ void AChaosPlayerController::Tick(float DeltaTime)
 	setHUDTime();
 
 	checkTimeSync(DeltaTime);
+
+	pollInit();
+}
+
+void AChaosPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AChaosPlayerController, matchState); //now replicated
 }
 
 
@@ -36,7 +47,6 @@ void AChaosPlayerController::checkTimeSync(float DeltaTime)
 	}
 }
 
-
 void AChaosPlayerController::setHUDTime() //should be done in player gamemode, just doing this for testing for now
 {
 	uint32 secondsLeft = FMath::CeilToInt(matchTime - getServerTime()); 
@@ -47,6 +57,25 @@ void AChaosPlayerController::setHUDTime() //should be done in player gamemode, j
 	}
 
 	countdownInt = secondsLeft;
+
+}
+
+void AChaosPlayerController::pollInit()
+{
+	if (characterOverlay == nullptr)
+	{
+		if (chaosHUD && chaosHUD->characterOverlay)
+		{
+			characterOverlay = chaosHUD->characterOverlay;
+
+			if (characterOverlay)
+			{
+				setHUDHealth(HUDHealth, HUDMaxHealth); //show cached values
+				setHUDScore(HUDScore);
+				setHUDDefeats(HUDDefeats); 
+			}
+		}
+	}
 
 }
 
@@ -83,6 +112,36 @@ void AChaosPlayerController::ReceivedPlayer()
 
 }
 
+void AChaosPlayerController::onMatchStateSet(FName state)
+{
+	matchState = state;
+
+	if (matchState == MatchState::InProgress)
+	{
+		chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+
+		if (chaosHUD)
+		{
+			chaosHUD->addCharacterOverlay(); //will only show HUD when in correct match state
+		}
+	}
+
+}
+
+void AChaosPlayerController::OnRep_matchState()
+{
+	if (matchState == MatchState::InProgress)
+	{
+		chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+
+		if (chaosHUD)
+		{
+			chaosHUD->addCharacterOverlay(); //will only show HUD when in correct match state
+		}
+	}
+}
+
+
 void AChaosPlayerController::setHUDHealth(float health, float maxHealth)
 {
 	chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD; //efficient way to check
@@ -100,6 +159,12 @@ void AChaosPlayerController::setHUDHealth(float health, float maxHealth)
 
 		chaosHUD->characterOverlay->HealthText->SetText(FText::FromString(healthText));
 	}
+	else
+	{
+		bIntializeCharacterOverlay = true;
+		HUDHealth = health; //cache in case not intializing properly
+		HUDMaxHealth = maxHealth;
+	}
 }
 
 void AChaosPlayerController::setHUDScore(float score)
@@ -114,6 +179,11 @@ void AChaosPlayerController::setHUDScore(float score)
 	{
 		FString scoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(score));
 		chaosHUD->characterOverlay->ScoreAmount->SetText(FText::FromString(scoreText));
+	}
+	else
+	{
+		bIntializeCharacterOverlay = true;
+		HUDScore = score;
 	}
 }
 
@@ -130,6 +200,11 @@ void AChaosPlayerController::setHUDDefeats(int32 defeats)
 	{
 		FString defeatText = FString::Printf(TEXT("%d"), defeats);
 		chaosHUD->characterOverlay->DefeatAmount->SetText(FText::FromString(defeatText));
+	}
+	else
+	{
+		bIntializeCharacterOverlay = true;
+		HUDDefeats = defeats;
 	}
 }
 
@@ -192,6 +267,4 @@ void AChaosPlayerController::OnPossess(APawn* InPawn)
 	{
 		setHUDHealth(chaosCharacter->getHealth(), chaosCharacter->getMaxHealth());
 	}
-
-
 }

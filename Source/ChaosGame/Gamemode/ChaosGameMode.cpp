@@ -39,6 +39,22 @@ void AChaosGameMode::BeginPlay()
 
 }
 
+void AChaosGameMode::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+
+	for (FConstPlayerControllerIterator it = GetWorld()->GetPlayerControllerIterator(); it; ++it) //iterator to go through all players
+	{
+		AChaosPlayerController* chaosPlayer = Cast<AChaosPlayerController>(*it); //deferencing
+
+		if (chaosPlayer)
+		{
+			chaosPlayer->onMatchStateSet(MatchState); //will set state for all players
+		}
+	}
+
+}
+
 
 void AChaosGameMode::playerEliminated(AChaosCharacter* elimmedCharacter, AChaosPlayerController* victimController, AChaosPlayerController* attackerController)
 {
