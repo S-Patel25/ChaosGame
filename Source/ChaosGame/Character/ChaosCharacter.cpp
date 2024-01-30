@@ -299,9 +299,9 @@ void AChaosCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (APlayerController* playerController = Cast<APlayerController>(Controller))
+	if (const ULocalPlayer* Player = (GEngine && GetWorld()) ? GEngine->GetFirstGamePlayer(GetWorld()) : nullptr) //quick fix as server player could not move after spawning from warm up stage
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* subSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer())) //using the subsystem and making sure its valid so we can use enhanced input
+		if (UEnhancedInputLocalPlayerSubsystem* subSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(Player)) //using the subsystem and making sure its valid so we can use enhanced input
 		{
 			subSystem->AddMappingContext(chaosContext, 0); //add it to the subsystem
 		}

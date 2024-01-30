@@ -8,6 +8,38 @@
 #include "GameFramework/PlayerStart.h"
 #include "ChaosGame/PlayerState/ChaosPlayerState.h"
 
+AChaosGameMode::AChaosGameMode()
+{
+	bDelayedStart = true; //will set to true, so manually can start match (this allows for warmup stage before match starts) 
+
+}
+
+void AChaosGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (MatchState == MatchState::WaitingToStart) //use matchstate namespace from gamemode class
+	{
+		countdownTime = warmupTime - GetWorld()->GetTimeSeconds() + levelStartingTime;
+
+		if (countdownTime <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+
+}
+
+
+void AChaosGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	levelStartingTime = GetWorld()->GetTimeSeconds(); //for current level time, rather then full game time since launched
+
+}
+
+
 void AChaosGameMode::playerEliminated(AChaosCharacter* elimmedCharacter, AChaosPlayerController* victimController, AChaosPlayerController* attackerController)
 {
 	AChaosPlayerState* attackerPlayerState = attackerController ? Cast<AChaosPlayerState>(attackerController->PlayerState) : nullptr; //casts to get attacker and victims player states
