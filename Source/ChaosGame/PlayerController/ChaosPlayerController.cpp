@@ -9,12 +9,18 @@
 #include "ChaosGame/Character/ChaosCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "ChaosGame/Gamemode/ChaosGameMode.h"
+#include "ChaosGame/HUD/Announcement.h"
 
 void AChaosPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	chaosHUD = Cast<AChaosHUD>(GetHUD()); //casting as gethud returns AHUD
+
+	if (chaosHUD)
+	{
+		chaosHUD->addAnnouncement(); //do it in begin play instead of waitingtostart state as HUD wont be intialized then
+	}
 }
 
 void AChaosPlayerController::Tick(float DeltaTime)
@@ -118,26 +124,30 @@ void AChaosPlayerController::onMatchStateSet(FName state)
 
 	if (matchState == MatchState::InProgress)
 	{
-		chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+		handleMatchHasStarted();
+	}
+}
 
-		if (chaosHUD)
+void AChaosPlayerController::handleMatchHasStarted()
+{
+	chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+
+	if (chaosHUD)
+	{
+		chaosHUD->addCharacterOverlay(); //will only show HUD when in correct match state
+
+		if (chaosHUD->announcement) //if valid, then remove from viewport (as warm up time is over)
 		{
-			chaosHUD->addCharacterOverlay(); //will only show HUD when in correct match state
+			chaosHUD->announcement->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
-
 }
 
 void AChaosPlayerController::OnRep_matchState()
 {
 	if (matchState == MatchState::InProgress)
 	{
-		chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
-
-		if (chaosHUD)
-		{
-			chaosHUD->addCharacterOverlay(); //will only show HUD when in correct match state
-		}
+		handleMatchHasStarted();
 	}
 }
 

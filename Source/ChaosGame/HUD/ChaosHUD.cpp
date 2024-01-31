@@ -4,6 +4,7 @@
 #include "ChaosHUD.h"
 #include "GameFramework/PlayerController.h"
 #include "CharacterOverlay.h"
+#include "ChaosGame/HUD/Announcement.h"
 
 void AChaosHUD::BeginPlay()
 {
@@ -21,6 +22,18 @@ void AChaosHUD::addCharacterOverlay()
 		characterOverlay->AddToViewport();
 	}
 }
+
+void AChaosHUD::addAnnouncement()
+{
+	APlayerController* playerController = GetOwningPlayerController();
+
+	if (playerController && announcementClass)
+	{
+		announcement = CreateWidget<UAnnouncement>(playerController, announcementClass);
+		announcement->AddToViewport();
+	}
+}
+
 
 void AChaosHUD::DrawHUD()
 {

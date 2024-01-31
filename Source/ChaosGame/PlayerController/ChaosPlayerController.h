@@ -33,6 +33,8 @@ public:
 
 	void onMatchStateSet(FName state);
 
+	void handleMatchHasStarted(); //similar to gamemode class
+
 
 protected:
 	virtual void BeginPlay() override;
