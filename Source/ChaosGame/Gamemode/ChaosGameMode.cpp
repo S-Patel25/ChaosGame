@@ -8,6 +8,12 @@
 #include "GameFramework/PlayerStart.h"
 #include "ChaosGame/PlayerState/ChaosPlayerState.h"
 
+
+namespace MatchState
+{
+	const FName Cooldown = FName("Cooldown");
+}
+
 AChaosGameMode::AChaosGameMode()
 {
 	bDelayedStart = true; //will set to true, so manually can start match (this allows for warmup stage before match starts) 
@@ -25,6 +31,15 @@ void AChaosGameMode::Tick(float DeltaTime)
 		if (countdownTime <= 0.f)
 		{
 			StartMatch();
+		}
+	}
+	else if (MatchState == MatchState::InProgress)
+	{
+		countdownTime = warmupTime + matchTime - GetWorld()->GetTimeSeconds() + levelStartingTime; //time is difference since in game now
+
+		if (countdownTime <= 0.f)
+		{
+			SetMatchState(MatchState::Cooldown); //set to cooldown once game over
 		}
 	}
 

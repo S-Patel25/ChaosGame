@@ -172,6 +172,10 @@ void AChaosPlayerController::onMatchStateSet(FName state)
 	{
 		handleMatchHasStarted();
 	}
+	else if (matchState == MatchState::Cooldown)
+	{
+		handleCooldown();
+	}
 }
 
 void AChaosPlayerController::handleMatchHasStarted()
@@ -189,11 +193,30 @@ void AChaosPlayerController::handleMatchHasStarted()
 	}
 }
 
+void AChaosPlayerController::handleCooldown()
+{
+	chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+
+	if (chaosHUD)
+	{
+		chaosHUD->characterOverlay->RemoveFromParent();
+
+		if (chaosHUD->announcement)
+		{
+			chaosHUD->announcement->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+}
+
 void AChaosPlayerController::OnRep_matchState()
 {
 	if (matchState == MatchState::InProgress)
 	{
 		handleMatchHasStarted();
+	}
+	else if (matchState == MatchState::Cooldown)
+	{
+		handleCooldown();
 	}
 }
 

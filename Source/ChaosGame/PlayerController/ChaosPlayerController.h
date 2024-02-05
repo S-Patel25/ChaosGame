@@ -36,6 +36,8 @@ public:
 
 	void handleMatchHasStarted(); //similar to gamemode class
 
+	void handleCooldown();
+
 
 protected:
 	virtual void BeginPlay() override;
