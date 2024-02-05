@@ -10,17 +10,14 @@
 #include "Net/UnrealNetwork.h"
 #include "ChaosGame/Gamemode/ChaosGameMode.h"
 #include "ChaosGame/HUD/Announcement.h"
+#include "Kismet/GameplayStatics.h"
 
 void AChaosPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	chaosHUD = Cast<AChaosHUD>(GetHUD()); //casting as gethud returns AHUD
-
-	if (chaosHUD)
-	{
-		chaosHUD->addAnnouncement(); //do it in begin play instead of waitingtostart state as HUD wont be intialized then
-	}
+	ServerCheckMatchState();
 }
 
 void AChaosPlayerController::Tick(float DeltaTime)
@@ -53,13 +50,62 @@ void AChaosPlayerController::checkTimeSync(float DeltaTime)
 	}
 }
 
+
+void AChaosPlayerController::ServerCheckMatchState_Implementation()
+{
+	AChaosGameMode* gameMode = Cast<AChaosGameMode>(UGameplayStatics::GetGameMode(this)); //cast to gamemode
+
+	if (gameMode)
+	{
+		warmupTime = gameMode->warmupTime;
+		matchTime = gameMode->matchTime; //setting through gamemode now rather then hardcoding
+		levelStartingTime = gameMode->levelStartingTime;
+		matchState = gameMode->GetMatchState();
+
+		ClientJoinMidgame(matchState, warmupTime, matchTime, levelStartingTime);
+
+		if (chaosHUD && matchState == MatchState::WaitingToStart)
+		{
+			chaosHUD->addAnnouncement(); //do it in begin play instead of waitingtostart state as HUD wont be intialized then
+		}
+	}
+
+}
+
+void AChaosPlayerController::ClientJoinMidgame_Implementation(FName stateOfMatch, float warmup, float match, float startingTime)
+{
+	warmupTime = warmup;
+	matchTime = match;
+	levelStartingTime = startingTime;
+	matchState = stateOfMatch;
+
+	onMatchStateSet(matchState);
+
+	if (chaosHUD && matchState == MatchState::WaitingToStart)
+	{
+		chaosHUD->addAnnouncement(); //do it in begin play instead of waitingtostart state as HUD wont be intialized then
+	}
+
+}
+
 void AChaosPlayerController::setHUDTime() //should be done in player gamemode, just doing this for testing for now
 {
+	float timeLeft = 0.f;
+	if (matchState == MatchState::WaitingToStart) timeLeft = warmupTime - getServerTime() + levelStartingTime; //simple math to get correct time to display on player HUD
+	else if (matchState == MatchState::InProgress) timeLeft = warmupTime + matchTime - getServerTime() + levelStartingTime;
+
 	uint32 secondsLeft = FMath::CeilToInt(matchTime - getServerTime()); 
 
 	if (countdownInt != secondsLeft)
 	{
-		setHUDMatchCountdown(matchTime - getServerTime());
+		if (matchState == MatchState::WaitingToStart)
+		{
+			setHUDAnnouncementCountdown(timeLeft);
+		}
+		if (matchState == MatchState::InProgress)
+		{
+			setHUDMatchCountdown(timeLeft);
+		}
 	}
 
 	countdownInt = secondsLeft;
@@ -264,6 +310,24 @@ void AChaosPlayerController::setHUDMatchCountdown(float countdownTime)
 
 		FString countdownText = FString::Printf(TEXT("%02d:%02d"), minutes, seconds); //will show time with correct formatting (10:03), for example
 		chaosHUD->characterOverlay->MatchCountdownText->SetText(FText::FromString(countdownText));
+	}
+}
+
+void AChaosPlayerController::setHUDAnnouncementCountdown(float countdownTime)
+{
+	chaosHUD = chaosHUD == nullptr ? Cast<AChaosHUD>(GetHUD()) : chaosHUD;
+
+	bool bHUDValid = chaosHUD &&
+		chaosHUD->announcement &&
+		chaosHUD->announcement->WarmupTime;
+
+	if (bHUDValid)
+	{
+		int32 minutes = FMath::FloorToInt(countdownTime / 60.f); //this will get minutes
+		int32 seconds = countdownTime - minutes * 60; //gets seconds
+
+		FString countdownText = FString::Printf(TEXT("%02d:%02d"), minutes, seconds); //will show time with correct formatting (10:03), for example
+		chaosHUD->announcement->WarmupTime->SetText(FText::FromString(countdownText));
 	}
 }
 

@@ -25,6 +25,10 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	float warmupTime = 10.f; //how much time we can fly around before match starts (warm up)
 
+	UPROPERTY(EditDefaultsOnly)
+	float matchTime = 120.f;
+
+
 	float levelStartingTime = 0.f;
 
 protected:

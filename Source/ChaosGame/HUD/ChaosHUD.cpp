@@ -27,7 +27,7 @@ void AChaosHUD::addAnnouncement()
 {
 	APlayerController* playerController = GetOwningPlayerController();
 
-	if (playerController && announcementClass)
+	if (playerController && announcementClass && announcement == nullptr)
 	{
 		announcement = CreateWidget<UAnnouncement>(playerController, announcementClass);
 		announcement->AddToViewport();

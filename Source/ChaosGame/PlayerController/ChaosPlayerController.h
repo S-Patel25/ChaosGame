@@ -23,6 +23,7 @@ public:
 	void setHUDWeaponAmmo(int32 Ammo);
 	void setHUDCarriedAmmo(int32 Ammo);
 	void setHUDMatchCountdown(float countdownTime);
+	void setHUDAnnouncementCountdown(float countdownTime);
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -59,12 +60,20 @@ protected:
 	float timeSyncRunningTime = 0.f;
 	void checkTimeSync(float DeltaTime);
 
+	UFUNCTION(Server, Reliable)
+	void ServerCheckMatchState(); //so controller class knows what match state game is currently in
+
+	UFUNCTION(Client, Reliable)
+	void ClientJoinMidgame(FName stateOfMatch, float warmup, float match, float startingTime); //since only happeninig once, its ok to send large amount of data (match time, warmup, etc.)
+
 private:
 
 	UPROPERTY()
 	class AChaosHUD* chaosHUD;
 
-	float matchTime = 120.f;
+	float levelStartingTime = 0.f;
+	float matchTime = 0.f;
+	float warmupTime = 0.f;
 	uint32 countdownInt = 0.f;
 
 	UPROPERTY(ReplicatedUsing = OnRep_matchState)
