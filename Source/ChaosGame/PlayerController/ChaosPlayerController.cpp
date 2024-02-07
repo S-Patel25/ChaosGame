@@ -12,6 +12,8 @@
 #include "ChaosGame/HUD/Announcement.h"
 #include "Kismet/GameplayStatics.h"
 #include "ChaosGame/ChaosComponents/CombatComponent.h"
+#include "ChaosGame/GameState/ChaosGameState.h"
+#include "ChaosGame/PlayerState/ChaosPlayerState.h"
 
 void AChaosPlayerController::BeginPlay()
 {
@@ -224,7 +226,41 @@ void AChaosPlayerController::handleCooldown()
 			chaosHUD->announcement->SetVisibility(ESlateVisibility::Visible);
 			FString announcementText("New Match Starts In: ");
 			chaosHUD->announcement->AnnouncementText->SetText(FText::FromString(announcementText));
-			chaosHUD->announcement->InfoText->SetText(FText());
+
+			AChaosGameState* chaosGameState = Cast<AChaosGameState>(UGameplayStatics::GetGameState(this));
+			AChaosPlayerState* chaosPlayerState = GetPlayerState<AChaosPlayerState>();
+
+			if (chaosGameState && chaosPlayerState)
+			{
+				TArray<AChaosPlayerState*> topPlayers = chaosGameState->topScoringPlayers;
+				
+				FString infoTextString;
+
+				if (topPlayers.Num() == 0)// no score or winners
+				{
+					infoTextString = FString("There is no winner :(");
+				}
+				else if (topPlayers.Num() == 1 && topPlayers[0] == chaosPlayerState) //if own player won
+				{
+					infoTextString = FString("You are the winner!");
+				}
+				else if (topPlayers.Num() == 1) //if someone else won
+				{
+					infoTextString = FString::Printf(TEXT("Winner: \n%s"), *topPlayers[0]->GetPlayerName()); //show name
+				}
+				else if (topPlayers.Num() > 1) //multiple winners
+				{
+					infoTextString = FString("Multiple Winners: \n");
+					for (auto tiedPlayer : topPlayers)
+					{
+						infoTextString.Append(FString::Printf(TEXT("%s\n"), *tiedPlayer->GetPlayerName())); //display all player names if winners
+					}
+				}
+
+				chaosHUD->announcement->InfoText->SetText(FText::FromString(infoTextString));
+			}
+
+			
 		}
 	}
 

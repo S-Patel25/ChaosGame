@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "ChaosGame/PlayerState/ChaosPlayerState.h"
+#include "ChaosGame/GameState/ChaosGameState.h"
 
 
 namespace MatchState
@@ -85,9 +86,12 @@ void AChaosGameMode::playerEliminated(AChaosCharacter* elimmedCharacter, AChaosP
 	AChaosPlayerState* attackerPlayerState = attackerController ? Cast<AChaosPlayerState>(attackerController->PlayerState) : nullptr; //casts to get attacker and victims player states
 	AChaosPlayerState* victimPlayerState = victimController ? Cast<AChaosPlayerState>(victimController->PlayerState) : nullptr;
 
+	AChaosGameState* chaosGameState = GetGameState<AChaosGameState>(); //handy function, no need to cast
+
 	if (attackerPlayerState && attackerPlayerState != victimPlayerState)
 	{
 		attackerPlayerState->addToScore(1.f); //when player gets elimmed
+		chaosGameState->updateTopScore(attackerPlayerState);
 	}
 
 	if (victimPlayerState)

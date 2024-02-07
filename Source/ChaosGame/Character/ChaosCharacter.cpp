@@ -168,16 +168,19 @@ void AChaosCharacter::Destroyed()
 {
 	Super::Destroyed();
 
-	if (elimBotComponent)
+	if (elimBotComponent) 
 	{
 		elimBotComponent->DestroyComponent(); //so it doesnt stick around on both server and client (since destroyed works on all machines)
 	}
-	if (combat && combat->equippedWeapon)
+
+	AChaosGameMode* chaosGameMode = Cast<AChaosGameMode>(UGameplayStatics::GetGameMode(this));
+
+	bool bMatchNotInProgress = chaosGameMode && chaosGameMode->GetMatchState() != MatchState::InProgress;
+
+	if (combat && combat->equippedWeapon && bMatchNotInProgress)
 	{
 		combat->equippedWeapon->Destroy(); //wont hang around during cooldown state
 	}
-
-
 }
 
 
@@ -206,6 +209,10 @@ void AChaosCharacter::multicastElim_Implementation()
 	GetCharacterMovement()->StopMovementImmediately(); //rotation stopped
 
 	bDisableGameplay = true; //use bool instead of disable input
+	if (combat)
+	{
+		combat->FireButtonPressed(false);
+	}
 
 	//disable collision
 
