@@ -11,6 +11,7 @@
 #include "ChaosGame/Gamemode/ChaosGameMode.h"
 #include "ChaosGame/HUD/Announcement.h"
 #include "Kismet/GameplayStatics.h"
+#include "ChaosGame/ChaosComponents/CombatComponent.h"
 
 void AChaosPlayerController::BeginPlay()
 {
@@ -59,10 +60,11 @@ void AChaosPlayerController::ServerCheckMatchState_Implementation()
 	{
 		warmupTime = gameMode->warmupTime;
 		matchTime = gameMode->matchTime; //setting through gamemode now rather then hardcoding
+		cooldownTime = gameMode->cooldownTime;
 		levelStartingTime = gameMode->levelStartingTime;
 		matchState = gameMode->GetMatchState();
 
-		ClientJoinMidgame(matchState, warmupTime, matchTime, levelStartingTime);
+		ClientJoinMidgame(matchState, warmupTime, matchTime, cooldownTime, levelStartingTime);
 
 		if (chaosHUD && matchState == MatchState::WaitingToStart)
 		{
@@ -72,10 +74,11 @@ void AChaosPlayerController::ServerCheckMatchState_Implementation()
 
 }
 
-void AChaosPlayerController::ClientJoinMidgame_Implementation(FName stateOfMatch, float warmup, float match, float startingTime)
+void AChaosPlayerController::ClientJoinMidgame_Implementation(FName stateOfMatch, float warmup, float match, float cooldown, float startingTime)
 {
 	warmupTime = warmup;
 	matchTime = match;
+	cooldownTime = cooldown;
 	levelStartingTime = startingTime;
 	matchState = stateOfMatch;
 
@@ -93,12 +96,23 @@ void AChaosPlayerController::setHUDTime() //should be done in player gamemode, j
 	float timeLeft = 0.f;
 	if (matchState == MatchState::WaitingToStart) timeLeft = warmupTime - getServerTime() + levelStartingTime; //simple math to get correct time to display on player HUD
 	else if (matchState == MatchState::InProgress) timeLeft = warmupTime + matchTime - getServerTime() + levelStartingTime;
+	else if (matchState == MatchState::Cooldown) timeLeft = cooldownTime + warmupTime + matchTime - getServerTime() + levelStartingTime;
 
 	uint32 secondsLeft = FMath::CeilToInt(matchTime - getServerTime()); 
 
+	if (HasAuthority())
+	{
+		chaosGameMode = chaosGameMode == nullptr ? Cast<AChaosGameMode>(UGameplayStatics::GetGameMode(this)) : chaosGameMode;
+
+		if (chaosGameMode)
+		{
+			secondsLeft = FMath::CeilToInt(chaosGameMode->getCountdownTime() + levelStartingTime); //get countdown time from gamemode
+		}
+	}
+
 	if (countdownInt != secondsLeft)
 	{
-		if (matchState == MatchState::WaitingToStart)
+		if (matchState == MatchState::WaitingToStart || matchState == MatchState::Cooldown)
 		{
 			setHUDAnnouncementCountdown(timeLeft);
 		}
@@ -201,10 +215,25 @@ void AChaosPlayerController::handleCooldown()
 	{
 		chaosHUD->characterOverlay->RemoveFromParent();
 
-		if (chaosHUD->announcement)
+		bool bHUDValid = chaosHUD->announcement && 
+			chaosHUD->announcement->AnnouncementText && 
+			chaosHUD->announcement->InfoText;
+
+		if (bHUDValid)
 		{
 			chaosHUD->announcement->SetVisibility(ESlateVisibility::Visible);
+			FString announcementText("New Match Starts In: ");
+			chaosHUD->announcement->AnnouncementText->SetText(FText::FromString(announcementText));
+			chaosHUD->announcement->InfoText->SetText(FText());
 		}
+	}
+
+	AChaosCharacter* chaosCharacter = Cast<AChaosCharacter>(GetPawn());
+
+	if (chaosCharacter && chaosCharacter->getCombat())
+	{
+		chaosCharacter->bDisableGameplay = true; //get pawn cast, then disable input
+		chaosCharacter->getCombat()->FireButtonPressed(false); //so if player is holding fire while input disable, it will stop firing and not just infinitly fire
 	}
 }
 
@@ -328,6 +357,12 @@ void AChaosPlayerController::setHUDMatchCountdown(float countdownTime)
 
 	if (bHUDValid)
 	{
+		if (countdownTime < 0.f)
+		{
+			chaosHUD->characterOverlay->MatchCountdownText->SetText(FText()); //prevent -ve number showing on screen
+			return;
+		}
+
 		int32 minutes = FMath::FloorToInt(countdownTime / 60.f); //this will get minutes
 		int32 seconds = countdownTime - minutes * 60; //gets seconds
 
@@ -346,6 +381,12 @@ void AChaosPlayerController::setHUDAnnouncementCountdown(float countdownTime)
 
 	if (bHUDValid)
 	{
+		if (countdownTime < 0.f)
+		{
+			chaosHUD->announcement->WarmupTime->SetText(FText()); //empty string
+			return;
+		}
+
 		int32 minutes = FMath::FloorToInt(countdownTime / 60.f); //this will get minutes
 		int32 seconds = countdownTime - minutes * 60; //gets seconds
 

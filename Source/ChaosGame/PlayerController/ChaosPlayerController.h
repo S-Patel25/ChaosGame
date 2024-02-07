@@ -66,16 +66,20 @@ protected:
 	void ServerCheckMatchState(); //so controller class knows what match state game is currently in
 
 	UFUNCTION(Client, Reliable)
-	void ClientJoinMidgame(FName stateOfMatch, float warmup, float match, float startingTime); //since only happeninig once, its ok to send large amount of data (match time, warmup, etc.)
+	void ClientJoinMidgame(FName stateOfMatch, float warmup, float match, float cooldown, float startingTime); //since only happeninig once, its ok to send large amount of data (match time, warmup, etc.)
 
 private:
 
 	UPROPERTY()
 	class AChaosHUD* chaosHUD;
 
+	UPROPERTY()
+	class AChaosGameMode* chaosGameMode;
+	
 	float levelStartingTime = 0.f;
 	float matchTime = 0.f;
 	float warmupTime = 0.f;
+	float cooldownTime = 0.f;
 	uint32 countdownInt = 0.f;
 
 	UPROPERTY(ReplicatedUsing = OnRep_matchState)

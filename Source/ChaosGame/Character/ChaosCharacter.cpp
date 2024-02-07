@@ -72,6 +72,7 @@ void AChaosCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 	DOREPLIFETIME_CONDITION(AChaosCharacter, overlappingWeapon, COND_OwnerOnly); //macro for replication with a condition (owner only means for pawn specific, so only player who interacts will be affected)
 	DOREPLIFETIME(AChaosCharacter, health);
+	DOREPLIFETIME(AChaosCharacter, bDisableGameplay);
 }
 
 void AChaosCharacter::PostInitializeComponents()
@@ -171,6 +172,10 @@ void AChaosCharacter::Destroyed()
 	{
 		elimBotComponent->DestroyComponent(); //so it doesnt stick around on both server and client (since destroyed works on all machines)
 	}
+	if (combat && combat->equippedWeapon)
+	{
+		combat->equippedWeapon->Destroy(); //wont hang around during cooldown state
+	}
 
 
 }
@@ -200,10 +205,7 @@ void AChaosCharacter::multicastElim_Implementation()
 	GetCharacterMovement()->DisableMovement(); //movement stopped
 	GetCharacterMovement()->StopMovementImmediately(); //rotation stopped
 
-	if (chaosPlayerController)
-	{
-		DisableInput(chaosPlayerController); //disable weapon
-	}
+	bDisableGameplay = true; //use bool instead of disable input
 
 	//disable collision
 
@@ -274,6 +276,32 @@ void AChaosCharacter::pollInit()
 
 }
 
+void AChaosCharacter::rotateInPlace(float DeltaTime)
+{
+	if (bDisableGameplay)
+	{
+		bUseControllerRotationYaw = false; //make sure states and bools are set correctly too before returning
+		turningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+
+	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled()) //since in order (enum are ints, sim proxie is lower then other ones)
+	{
+		AimOffset(DeltaTime); //every tick
+	}
+	else
+	{
+		timeSinceLastMovementReplication += DeltaTime; //so we can call after a while
+
+		if (timeSinceLastMovementReplication > 0.25f)
+		{
+			OnRep_ReplicatedMovement();
+		}
+
+		CalculateAO_Pitch();
+	}
+}
+
 void AChaosCharacter::recieveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
 	health = FMath::Clamp(health - Damage, 0.f, maxHealth);
@@ -327,6 +355,8 @@ void AChaosCharacter::updateHUDHealth()
 
 void AChaosCharacter::Movement(const FInputActionValue& Value)
 {
+	if (bDisableGameplay) return; //disable movement if bool true
+
 	const FVector2D moveVector = Value.Get<FVector2D>(); //using the value from the input to decide how and where character movement happens
 
 	const FRotator rotation = Controller->GetControlRotation();
@@ -349,6 +379,8 @@ void AChaosCharacter::Look(const FInputActionValue& Value)
 
 void AChaosCharacter::Equip()
 {
+	if (bDisableGameplay) return;
+
 	if (combat)
 	{
 		if (HasAuthority())
@@ -364,6 +396,8 @@ void AChaosCharacter::Equip()
 
 void AChaosCharacter::CrouchPressed()
 {
+	if (bDisableGameplay) return;
+
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -377,6 +411,8 @@ void AChaosCharacter::CrouchPressed()
 
 void AChaosCharacter::AimPressed()
 {
+	if (bDisableGameplay) return;
+
 	if (combat)
 	{
 		combat->SetAiming(true);
@@ -386,6 +422,8 @@ void AChaosCharacter::AimPressed()
 
 void AChaosCharacter::AimReleased()
 {
+	if (bDisableGameplay) return;
+
 	if (combat)
 	{
 		combat->SetAiming(false);
@@ -394,6 +432,8 @@ void AChaosCharacter::AimReleased()
 
 void AChaosCharacter::FirePressed()
 {
+	if (bDisableGameplay) return;
+
 	if (combat)
 	{
 		combat->FireButtonPressed(true);
@@ -403,6 +443,8 @@ void AChaosCharacter::FirePressed()
 
 void AChaosCharacter::FireReleased()
 {
+	if (bDisableGameplay) return;
+
 	if (combat)
 	{
 		combat->FireButtonPressed(false);
@@ -411,6 +453,8 @@ void AChaosCharacter::FireReleased()
 
 void AChaosCharacter::ReloadPressed()
 {
+	if (bDisableGameplay) return;
+
 	if (combat)
 	{
 		combat->Reload();
@@ -511,6 +555,8 @@ void AChaosCharacter::SimProxiesTurn()
 
 void AChaosCharacter::Jump()
 {
+	if (bDisableGameplay) return;
+
 	if (bIsCrouched) //doing this so player can jump while crouching
 	{
 		UnCrouch();
@@ -526,22 +572,7 @@ void AChaosCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled()) //since in order (enum are ints, sim proxie is lower then other ones)
-	{
-		AimOffset(DeltaTime); //every tick
-	}
-	else
-	{
-		timeSinceLastMovementReplication += DeltaTime; //so we can call after a while
-
-		if (timeSinceLastMovementReplication > 0.25f)
-		{
-			OnRep_ReplicatedMovement();
-		}
-
-		CalculateAO_Pitch();
-	}
-
+	rotateInPlace(DeltaTime);
 	hideCameraIfCharacterClose();
 	pollInit(); //can't do in begin play as player state is not intialized by then, so tick will take care of that
 }

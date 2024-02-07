@@ -42,6 +42,15 @@ void AChaosGameMode::Tick(float DeltaTime)
 			SetMatchState(MatchState::Cooldown); //set to cooldown once game over
 		}
 	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		countdownTime = cooldownTime + warmupTime + matchTime - GetWorld()->GetTimeSeconds() + levelStartingTime;
+
+		if (countdownTime <= 0.f)
+		{
+			RestartGame(); //calls gamemode restart game (does server travel and respawns all objects)
+		}
+	}
 
 }
 

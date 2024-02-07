@@ -47,6 +47,9 @@ public:
 
 	virtual void Destroyed() override;
 
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
+
 	//to test weapon rotation
 
 	UPROPERTY(EditAnywhere, Category = "WeaponRotation")
@@ -68,6 +71,8 @@ protected:
 
 	//HUD intializing
 	void pollInit();
+
+	void rotateInPlace(float DeltaTime);
 
 	UFUNCTION() //dont forget UFUNCTION macro for callbacks
 	void recieveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser); //specific function callback
@@ -252,4 +257,6 @@ public:
 	FORCEINLINE float getHealth() const { return health; }
 	FORCEINLINE float getMaxHealth() const { return maxHealth; }
 	ECombatState getCombatState() const;
+	FORCEINLINE UCombatComponent* getCombat() const { return combat; }
+	FORCEINLINE bool getDisableGameplay() const { return bDisableGameplay; }
 };	

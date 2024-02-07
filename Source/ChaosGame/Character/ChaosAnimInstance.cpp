@@ -93,7 +93,7 @@ void UChaosAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	bUseFABRIK = chaosCharacter->getCombatState() != ECombatState::ECS_Reloading; //only use FABRIK when not reloading
 
-	bUseAimOffsets = chaosCharacter->getCombatState() != ECombatState::ECS_Reloading; //to prevent weird aim offset behaviour when reloading
+	bUseAimOffsets = chaosCharacter->getCombatState() != ECombatState::ECS_Reloading && !chaosCharacter->getDisableGameplay(); //to prevent weird aim offset behaviour when reloading
 
-	bTransformRightHand = chaosCharacter->getCombatState() != ECombatState::ECS_Reloading; //same for now, will change later (with more states involved, grenades, diff weapons, etc.)
+	bTransformRightHand = chaosCharacter->getCombatState() != ECombatState::ECS_Reloading && !chaosCharacter->getDisableGameplay(); //same for now, will change later (with more states involved, grenades, diff weapons, etc.)
 };
