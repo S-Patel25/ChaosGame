@@ -200,7 +200,10 @@ void AChaosPlayerController::handleMatchHasStarted()
 
 	if (chaosHUD)
 	{
-		chaosHUD->addCharacterOverlay(); //will only show HUD when in correct match state
+		if (chaosHUD->characterOverlay == nullptr)
+		{
+			chaosHUD->addCharacterOverlay(); //will only show HUD when in correct match state
+		}
 
 		if (chaosHUD->announcement) //if valid, then remove from viewport (as warm up time is over)
 		{

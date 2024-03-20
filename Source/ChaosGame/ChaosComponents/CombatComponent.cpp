@@ -390,7 +390,7 @@ void UCombatComponent::OnRep_CarriedAmmo()
 void UCombatComponent::intializeCarriedAmmo()
 {
 	carriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, startingARAmmo); //emplace gets rid of temp vals
-
+	carriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, startingRocketAmmo);
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
