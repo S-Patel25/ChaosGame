@@ -26,25 +26,26 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
 
-private:
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* impactParticles;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* impactSound;
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* collisionBox;
+
+private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* projectileMovementComponent; //hand ue5 class that handles projectile movememnt (replicated)
 
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem* tracer;
+	UParticleSystem* tracer;
 
 	UPROPERTY()
 	class UParticleSystemComponent* tracerComponent;
 
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* impactParticles;
-
-	UPROPERTY(EditAnywhere)
-	class USoundCue* impactSound;
 
 public:	
 

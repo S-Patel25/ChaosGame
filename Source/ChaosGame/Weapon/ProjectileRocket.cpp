@@ -3,6 +3,14 @@
 
 #include "ProjectileRocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Sound/SoundCue.h"
+#include "Components/BoxComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystemInstanceController.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
+
 
 AProjectileRocket::AProjectileRocket()
 {
@@ -12,11 +20,62 @@ AProjectileRocket::AProjectileRocket()
 
 }
 
+
+void AProjectileRocket::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (!HasAuthority())
+	{
+		collisionBox->OnComponentHit.AddDynamic(this, &AProjectileRocket::OnHit); //bind delegate to our function
+	}
+
+	if (trailSystem)
+	{
+		trailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			trailSystem,
+			GetRootComponent(), //spawns niagara emitter
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+
+	if (projectileLoop && loopingSoundAttenuation)
+	{
+		projectileLoopComponent = UGameplayStatics::SpawnSoundAttached(
+			projectileLoop,
+			GetRootComponent(),
+			FName(),
+			GetActorLocation(),
+			EAttachLocation::KeepWorldPosition,
+			false,
+			1.f,
+			1.f,
+			0.f,
+			loopingSoundAttenuation,
+			(USoundConcurrency*)nullptr, //c style cast
+			false
+		);
+	}
+
+
+}
+
+void AProjectileRocket::destroyTimerFinished()
+{
+	Destroy(); //delay when rocket explodes so trail is still there upon impact
+}
+
+
+
 void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	APawn* firingPawn = GetInstigator(); 
 
-	if (firingPawn)
+	if (firingPawn && HasAuthority()) //only server deals with damage
 	{
 		AController* firingController = firingPawn->GetController();
 		if (firingController)
@@ -37,7 +96,49 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 		}
 	}
 
+	GetWorldTimerManager().SetTimer( //setting timer to when rocket gets destroyed
+		destroyTimer,
+		this,
+		&AProjectileRocket::destroyTimerFinished,
+		destroyTime
+	);
 
-	Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+	if (impactParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impactParticles, GetActorTransform()); //spawn impact sound
+	}
+
+	if (impactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, impactSound, GetActorLocation());
+	}
+
+	if (rocketMesh)
+	{
+		rocketMesh->SetVisibility(false);
+	}
+
+	if (collisionBox)
+	{
+		collisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); //so weird things dont happen once it hits somehting
+	}
+
+	if (trailSystemComponent && trailSystemComponent->GetSystemInstanceController())
+	{
+		trailSystemComponent->GetSystemInstanceController()->Deactivate();
+	}
+	
+	if (projectileLoopComponent && projectileLoopComponent->IsPlaying())
+	{
+		projectileLoopComponent->Stop(); //stop playing sound once hit
+	}
+
+
+	//Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+
+}
+
+void AProjectileRocket::Destroyed()
+{
 
 }
