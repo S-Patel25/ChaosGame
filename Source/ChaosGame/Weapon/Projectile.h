@@ -34,11 +34,13 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* collisionBox;
+	
+	UPROPERTY(VisibleAnywhere)
+	class UProjectileMovementComponent* projectileMovementComponent; //hand ue5 class that handles projectile movememnt (replicated)
 
 private:
 
-	UPROPERTY(VisibleAnywhere)
-	class UProjectileMovementComponent* projectileMovementComponent; //hand ue5 class that handles projectile movememnt (replicated)
+	
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* tracer;

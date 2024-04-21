@@ -17,6 +17,7 @@ AWeapon::AWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true; //multiplayer
+	SetReplicateMovement(true); //to avoid inconsisten overlap events with client and server
 
 	weaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	weaponMesh->SetupAttachment(RootComponent);

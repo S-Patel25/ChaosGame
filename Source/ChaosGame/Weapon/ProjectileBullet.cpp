@@ -3,7 +3,17 @@
 
 #include "ProjectileBullet.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "GameFramework/Character.h"
+
+AProjectileBullet::AProjectileBullet()
+{
+	projectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
+	projectileMovementComponent->bRotationFollowsVelocity = true; //fallof and rotation remains true
+	projectileMovementComponent->SetIsReplicated(true);
+
+
+}
 
 void AProjectileBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {

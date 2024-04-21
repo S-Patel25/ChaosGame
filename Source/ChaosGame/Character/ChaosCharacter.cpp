@@ -133,6 +133,9 @@ void AChaosCharacter::playReloadMontage()
 			case EWeaponType::EWT_AssaultRifle: //montage jump based on weapon type
 				sectionName = FName("Rifle");
 				break;
+			case EWeaponType::EWT_RocketLauncher: //will add animation later
+				sectionName = FName("Rifle");
+				break;
 		}
 
 		animInstance->Montage_JumpToSection(sectionName);

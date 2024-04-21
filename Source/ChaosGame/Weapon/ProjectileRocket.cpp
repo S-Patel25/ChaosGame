@@ -10,6 +10,7 @@
 #include "NiagaraSystemInstanceController.h"
 #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
+#include "RocketMovementComponent.h"
 
 
 AProjectileRocket::AProjectileRocket()
@@ -18,6 +19,9 @@ AProjectileRocket::AProjectileRocket()
 	rocketMesh->SetupAttachment(RootComponent);
 	rocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); //since just a tracer
 
+	rocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("RocketMovementComponent"));
+	rocketMovementComponent->bRotationFollowsVelocity = true;
+	rocketMovementComponent->SetIsReplicated(true);
 }
 
 
