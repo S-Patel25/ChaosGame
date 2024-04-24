@@ -136,6 +136,9 @@ void AChaosCharacter::playReloadMontage()
 			case EWeaponType::EWT_RocketLauncher: //will add animation later
 				sectionName = FName("Rifle");
 				break;
+			case EWeaponType::EWT_Pistol: 
+				sectionName = FName("Rifle");
+				break;
 		}
 
 		animInstance->Montage_JumpToSection(sectionName);
