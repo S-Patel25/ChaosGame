@@ -139,6 +139,9 @@ void AChaosCharacter::playReloadMontage()
 			case EWeaponType::EWT_Pistol: 
 				sectionName = FName("Rifle");
 				break;
+			case EWeaponType::EWT_SMG:
+				sectionName = FName("Rifle");
+				break;
 		}
 
 		animInstance->Montage_JumpToSection(sectionName);

@@ -6,6 +6,7 @@
 #include "ChaosGame/Character/ChaosCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
@@ -23,7 +24,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	{
 		FTransform socketTransform = muzzleFlashSocket->GetSocketTransform(getWeaponMesh()); //getting all this for line trace
 		FVector Start = socketTransform.GetLocation();
-		FVector End = Start + (HitTarget - Start) - 1.25f; //so it properly registers the hit
+		FVector End = Start + (HitTarget - Start) - 1.10f; //so it properly registers the hit
 
 
 		FHitResult fireHit;	
@@ -75,6 +76,30 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 						beam->SetVectorParameter(FName("Target"), beamEnd); //set endpoint for particle system
 					}
 				}
+			}
+			if (muzzleFlash)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(
+					world,
+					muzzleFlash,
+					socketTransform
+				);
+			}
+			if (fireSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(
+					this,
+					fireSound,
+					GetActorLocation()
+				);
+			}
+			if (hitSound) //adding these as SMG does not have anims and sounds in the pack
+			{
+				UGameplayStatics::PlaySoundAtLocation(
+					this,
+					hitSound,
+					fireHit.ImpactPoint
+				);
 			}
 		}
 	}
