@@ -146,6 +146,14 @@ void AWeapon::SetWeaponState(EWeaponState state) //weapon properties setter
 		weaponMesh->SetSimulatePhysics(false);
 		weaponMesh->SetEnableGravity(false);
 		weaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); //setting collision and physics property for weapon
+
+		if (weaponType == EWeaponType::EWT_SMG)
+		{
+			weaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); //for strap physics
+			weaponMesh->SetEnableGravity(true);
+			weaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		}
+
 		break;
 	case EWeaponState::EWS_Dropped:
 		if (HasAuthority())
@@ -155,6 +163,9 @@ void AWeapon::SetWeaponState(EWeaponState state) //weapon properties setter
 		weaponMesh->SetSimulatePhysics(true);
 		weaponMesh->SetEnableGravity(true);
 		weaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); //setting collision and physics property for weapon
+		weaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block); //can bounce when dropped, etc.
+		weaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+		weaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 		break;
 	}
 }
@@ -174,11 +185,22 @@ void AWeapon::OnRep_WeaponState()
 		weaponMesh->SetSimulatePhysics(false);
 		weaponMesh->SetEnableGravity(false);
 		weaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		if (weaponType == EWeaponType::EWT_SMG)
+		{
+			weaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); //for strap physics
+			weaponMesh->SetEnableGravity(true);
+			weaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		}
+
 		break;
 	case EWeaponState::EWS_Dropped:
 		weaponMesh->SetSimulatePhysics(true);
 		weaponMesh->SetEnableGravity(true);
 		weaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); //setting collision and physics property for weapon
+		weaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block); //can bounce when dropped, etc.
+		weaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+		weaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 		break;
 	}
 
