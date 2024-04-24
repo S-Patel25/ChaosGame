@@ -391,8 +391,9 @@ void UCombatComponent::intializeCarriedAmmo()
 {
 	carriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, startingARAmmo); //emplace gets rid of temp vals
 	carriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, startingRocketAmmo);
-	carriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, startingPistolAmmo);\
+	carriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, startingPistolAmmo);
 	carriedAmmoMap.Emplace(EWeaponType::EWT_SMG, startingSMGAmmo);
+	carriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, startingShotgunAmmo);
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)

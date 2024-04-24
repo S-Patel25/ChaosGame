@@ -7,6 +7,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "DrawDebugHelpers.h"
+#include "WeaponTypes.h"
 
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
@@ -104,3 +107,15 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		}
 	}
 }
+
+FVector AHitScanWeapon::traceEndWithScatter(const FVector& traceStart, const FVector& hitTarget)
+{
+	FVector toTargetNormalized = (hitTarget - traceStart).GetSafeNormal(); //vector from trace start to hit point
+	FVector sphereCenter = traceStart + toTargetNormalized * distanceToSphere; //location from trace start outwards based on distance to sphere value
+	FVector randVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, sphereRadius);
+	FVector endLoc = sphereCenter + randVec; //these vecs are to find a rand point inside the distance sphere for shotgun scatter
+	FVector toEndLoc = endLoc - traceStart;
+
+	return FVector(traceStart + toEndLoc * TRACE_LENGTH / toEndLoc.Size()); //we divide since trace length is very large
+}
+

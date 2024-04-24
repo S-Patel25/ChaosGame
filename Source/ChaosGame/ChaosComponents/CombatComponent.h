@@ -11,8 +11,6 @@
 
 class AWeapon;
 
-#define TRACE_LENGTH 80000 //for our line trace
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CHAOSGAME_API UCombatComponent : public UActorComponent
 {
@@ -146,6 +144,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 startingSMGAmmo = 30;
+
+	UPROPERTY(EditAnywhere)
+	int32 startingShotgunAmmo = 8;
 
 	void intializeCarriedAmmo();
 
