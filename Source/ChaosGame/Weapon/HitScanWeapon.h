@@ -27,5 +27,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* impactParticles; //to show hit
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* beamParticles;
 	
 };

@@ -5,6 +5,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "ChaosGame/Character/ChaosCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
@@ -18,7 +19,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 
 	const USkeletalMeshSocket* muzzleFlashSocket = getWeaponMesh()->GetSocketByName("MuzzleFlash");
 
-	if (muzzleFlashSocket && instigatorController)
+	if (muzzleFlashSocket)
 	{
 		FTransform socketTransform = muzzleFlashSocket->GetSocketTransform(getWeaponMesh()); //getting all this for line trace
 		FVector Start = socketTransform.GetLocation();
@@ -37,21 +38,21 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				ECollisionChannel::ECC_Visibility
 			);
 
+			FVector beamEnd = End;
+
 			if (fireHit.bBlockingHit)
-			{
+			{	
+				beamEnd = fireHit.ImpactPoint; //where to spawn beam particles
 				AChaosCharacter* chaosCharacter = Cast<AChaosCharacter>(fireHit.GetActor()); //get char
-				if (chaosCharacter)
+				if (chaosCharacter && HasAuthority() && instigatorController) //moved check so particles can be seen on simulated proxies aswell
 				{
-					if (HasAuthority()) //damage is only applied on server
-					{
-						UGameplayStatics::ApplyDamage( //hit scan by line trace
-							chaosCharacter,
-							Damage,
-							instigatorController,
-							this, 
-							UDamageType::StaticClass()
-						);
-					}
+					UGameplayStatics::ApplyDamage( //hit scan by line trace
+						chaosCharacter,
+						Damage,
+						instigatorController,
+						this, 
+						UDamageType::StaticClass()
+					);
 				}
 				if (impactParticles)
 				{
@@ -61,6 +62,18 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 						fireHit.ImpactPoint,
 						fireHit.ImpactNormal.Rotation()
 					);
+				}
+				if (beamParticles)
+				{
+					UParticleSystemComponent* beam = UGameplayStatics::SpawnEmitterAtLocation( //spawn particle
+						world,
+						beamParticles,
+						socketTransform
+					);
+					if (beam)
+					{
+						beam->SetVectorParameter(FName("Target"), beamEnd); //set endpoint for particle system
+					}
 				}
 			}
 		}
