@@ -257,6 +257,17 @@ void AChaosCharacter::multicastElim_Implementation()
 			GetActorLocation()
 		);
 	}
+	bool bHideSniperScope =  //make sure user is aiming with sniper
+		IsLocallyControlled() && 
+		combat && 
+		combat->bAiming && 
+		combat->equippedWeapon && 
+		combat->equippedWeapon->GetWeaponType() == EWeaponType::EWT_Sniper;
+
+	if (bHideSniperScope)
+	{
+		showSniperScopeWidget(false); //so scope doesnt show in case zoomed when died etc.
+	}
 }
 
 void AChaosCharacter::elimTimerFinished()

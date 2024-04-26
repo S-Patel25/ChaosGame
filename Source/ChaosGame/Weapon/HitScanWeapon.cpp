@@ -99,7 +99,7 @@ void AHitScanWeapon::weaponTraceHit(const FVector& traceStart, const FVector& hi
 	UWorld* world = GetWorld();
 	if (world)
 	{
-		FVector End = bUseScatter ? traceEndWithScatter(traceStart, hitTarget) : traceStart + (hitTarget - traceStart); //ternary operator based on scatter bool
+		FVector End = bUseScatter ? traceEndWithScatter(traceStart, hitTarget) : traceStart + (hitTarget - traceStart) * 1.25f; //ternary operator based on scatter bool
 
 		world->LineTraceSingleByChannel(
 			outHit,
@@ -108,7 +108,7 @@ void AHitScanWeapon::weaponTraceHit(const FVector& traceStart, const FVector& hi
 			ECollisionChannel::ECC_Visibility
 		);
 		FVector beamEnd = End;
-		if (outHit.bBlockingHit)
+		if (outHit.bBlockingHit) 
 		{
 			beamEnd = outHit.ImpactPoint;
 
@@ -127,7 +127,6 @@ void AHitScanWeapon::weaponTraceHit(const FVector& traceStart, const FVector& hi
 				}
 			}
 		}
-
 	}
 
 }

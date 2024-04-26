@@ -61,6 +61,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "WeaponRotation")
 	float RightHandRotationPitch;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void showSniperScopeWidget(bool bShowScope);
+
 
 protected:
 	virtual void BeginPlay() override;

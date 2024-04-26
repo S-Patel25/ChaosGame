@@ -54,6 +54,7 @@ void UCombatComponent::BeginPlay()
 
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
+	if (chaosCharacter == nullptr || equippedWeapon == nullptr) return;
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming); //this will make sure client gets replication properly for aiming
 
@@ -61,6 +62,11 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	{
 		chaosCharacter->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? aimWalkSpeed : baseWalkSpeed; //using ternary to easily check if aiming or not to update movement speed
 	}
+	if (chaosCharacter->IsLocallyControlled() && equippedWeapon->GetWeaponType() == EWeaponType::EWT_Sniper) //check if player has sniper so sniper scope widget can be shown
+	{
+		chaosCharacter->showSniperScopeWidget(bIsAiming);
+	}
+
 
 }
 
@@ -105,7 +111,6 @@ void UCombatComponent::Fire()
 {
 	if (canFire()) //ammo check
 	{
-		//bCanFire = false;
 		ServerFire(hitTarget); //calling server RPC
 		if (equippedWeapon)
 		{
@@ -357,12 +362,11 @@ void UCombatComponent::fireTimerFinished()
 {
 	if (equippedWeapon == nullptr) return;
 
-	//bCanFire = true;
 	if (bFireButtonPressed && equippedWeapon->bAutomatic)
 	{
 		Fire();
 	}
-
+	
 	if (equippedWeapon->isEmpty()) //auto reload
 	{
 		Reload();
