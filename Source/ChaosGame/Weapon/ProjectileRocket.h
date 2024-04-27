@@ -24,15 +24,6 @@ protected:
 	
 	virtual void BeginPlay() override;
 
-	void destroyTimerFinished();
-
-
-	UPROPERTY(EditAnywhere)
-	class UNiagaraSystem* trailSystem; //for the rocket trail
-
-	UPROPERTY()
-	class UNiagaraComponent* trailSystemComponent;
-
 	UPROPERTY(EditAnywhere)
 	USoundCue* projectileLoop; //all for looping sound when rocket in the air
 
@@ -46,11 +37,5 @@ protected:
 	class URocketMovementComponent* rocketMovementComponent;
 
 private:
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* rocketMesh; //to store the rocket itself
 
-	FTimerHandle destroyTimer;
-
-	UPROPERTY(EditAnywhere)
-	float destroyTime = 3.f;
 };

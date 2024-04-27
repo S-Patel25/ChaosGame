@@ -399,6 +399,7 @@ void UCombatComponent::intializeCarriedAmmo()
 	carriedAmmoMap.Emplace(EWeaponType::EWT_SMG, startingSMGAmmo);
 	carriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, startingShotgunAmmo);
 	carriedAmmoMap.Emplace(EWeaponType::EWT_Sniper, startingSniperAmmo);
+	carriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, startingGrenadeLauncherAmmo);
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)

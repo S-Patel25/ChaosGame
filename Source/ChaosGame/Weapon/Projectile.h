@@ -19,6 +19,10 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void startDestroyTimer();
+	void destroyTimerFinished();
+	void spawnTrailSystem();
+	void explodeDamage();
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit); //override
@@ -34,19 +38,37 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* collisionBox;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* trailSystem; //for the rocket trail
+
+	UPROPERTY()
+	class UNiagaraComponent* trailSystemComponent;
 	
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* projectileMovementComponent; //hand ue5 class that handles projectile movememnt (replicated)
 
-private:
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* projectileMesh;
 
-	
+	UPROPERTY(EditAnywhere)
+	float DamageInnerRaidus = 200.f;
+
+	UPROPERTY(EditAnywhere)
+	float DamageOuterRadius = 500.f;
+
+private:
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* tracer;
 
 	UPROPERTY()
 	class UParticleSystemComponent* tracerComponent;
+	
+	FTimerHandle destroyTimer;
+
+	UPROPERTY(EditAnywhere)
+	float destroyTime = 3.f;
 
 
 public:	

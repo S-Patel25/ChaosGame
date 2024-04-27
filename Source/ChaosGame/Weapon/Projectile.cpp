@@ -9,6 +9,9 @@
 #include "Sound/SoundCue.h"
 #include "ChaosGame/Character/ChaosCharacter.h"
 #include "ChaosGame/ChaosGame.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystemInstanceController.h"
+#include "NiagaraFunctionLibrary.h"
 
 AProjectile::AProjectile()
 {
@@ -51,10 +54,68 @@ void AProjectile::BeginPlay()
 	}
 }
 
+void AProjectile::startDestroyTimer()
+{
+	GetWorldTimerManager().SetTimer( //setting timer to when rocket gets destroyed
+		destroyTimer,
+		this,
+		&AProjectile::destroyTimerFinished,
+		destroyTime
+	);
+}
+
+void AProjectile::destroyTimerFinished()
+{
+	Destroy(); 
+}
+
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 
 	Destroy(); //so it doesn't stick (overrided function is already replicated, so we take advantage of that)
+}
+
+void AProjectile::spawnTrailSystem()
+{
+	if (trailSystem)
+	{
+		trailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			trailSystem,
+			GetRootComponent(), //spawns niagara emitter
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+}
+
+void AProjectile::explodeDamage()
+{
+	APawn* firingPawn = GetInstigator();
+
+	if (firingPawn && HasAuthority()) //only server deals with damage
+	{
+		AController* firingController = firingPawn->GetController();
+		if (firingController)
+		{
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				this, //world contect object
+				Damage, //base damage
+				10.f, //min damage
+				GetActorLocation(), //origin
+				DamageInnerRaidus, //inner radius
+				DamageOuterRadius, //outer raidus
+				1.f, //damage falloff
+				UDamageType::StaticClass(), //damagetype class
+				TArray<AActor*>(), //ignore actors
+				this, //damage causer
+				firingController //instigatorcontroller
+			); //use rocket projectile for radial explosive damagge
+		}
+	}
+
 }
 
 void AProjectile::Tick(float DeltaTime)

@@ -15,9 +15,9 @@
 
 AProjectileRocket::AProjectileRocket()
 {
-	rocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket Mesh"));
-	rocketMesh->SetupAttachment(RootComponent);
-	rocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); //since just a tracer
+	projectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket Mesh"));
+	projectileMesh->SetupAttachment(RootComponent);
+	projectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); //since just a tracer
 
 	rocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("RocketMovementComponent"));
 	rocketMovementComponent->bRotationFollowsVelocity = true;
@@ -34,18 +34,7 @@ void AProjectileRocket::BeginPlay()
 		collisionBox->OnComponentHit.AddDynamic(this, &AProjectileRocket::OnHit); //bind delegate to our function
 	}
 
-	if (trailSystem)
-	{
-		trailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			trailSystem,
-			GetRootComponent(), //spawns niagara emitter
-			FName(),
-			GetActorLocation(),
-			GetActorRotation(),
-			EAttachLocation::KeepWorldPosition,
-			false
-		);
-	}
+	spawnTrailSystem();
 
 	if (projectileLoop && loopingSoundAttenuation)
 	{
@@ -64,48 +53,20 @@ void AProjectileRocket::BeginPlay()
 			false
 		);
 	}
-
-
 }
-
-void AProjectileRocket::destroyTimerFinished()
-{
-	Destroy(); //delay when rocket explodes so trail is still there upon impact
-}
-
 
 
 void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	APawn* firingPawn = GetInstigator(); 
-
-	if (firingPawn && HasAuthority()) //only server deals with damage
+	if (OtherActor == GetOwner())
 	{
-		AController* firingController = firingPawn->GetController();
-		if (firingController)
-		{
-			UGameplayStatics::ApplyRadialDamageWithFalloff(
-				this, //world contect object
-				Damage, //base damage
-				10.f, //min damage
-				GetActorLocation(), //origin
-				200.f, //inner radius
-				500.f, //outer raidus
-				1.f, //damage falloff
-				UDamageType::StaticClass(), //damagetype class
-				TArray<AActor*>(), //ignore actors
-				this, //damage causer
-				firingController //instigatorcontroller
-			); //use rocket projectile for radial explosive damagge
-		}
+		return;
 	}
 
-	GetWorldTimerManager().SetTimer( //setting timer to when rocket gets destroyed
-		destroyTimer,
-		this,
-		&AProjectileRocket::destroyTimerFinished,
-		destroyTime
-	);
+	explodeDamage();
+	
+
+	startDestroyTimer();
 
 	if (impactParticles)
 	{
@@ -117,9 +78,9 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 		UGameplayStatics::PlaySoundAtLocation(this, impactSound, GetActorLocation());
 	}
 
-	if (rocketMesh)
+	if (projectileMesh)
 	{
-		rocketMesh->SetVisibility(false);
+		projectileMesh->SetVisibility(false);
 	}
 
 	if (collisionBox)
