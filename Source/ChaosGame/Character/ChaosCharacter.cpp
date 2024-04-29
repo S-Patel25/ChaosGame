@@ -133,23 +133,23 @@ void AChaosCharacter::playReloadMontage()
 			case EWeaponType::EWT_AssaultRifle: //montage jump based on weapon type
 				sectionName = FName("Rifle");
 				break;
-			case EWeaponType::EWT_RocketLauncher: //will add animation later
-				sectionName = FName("Rifle");
+			case EWeaponType::EWT_RocketLauncher: 
+				sectionName = FName("RocketLauncher");
 				break;
 			case EWeaponType::EWT_Pistol: 
-				sectionName = FName("Rifle");
+				sectionName = FName("Pistol");
 				break;
 			case EWeaponType::EWT_SMG:
-				sectionName = FName("Rifle");
+				sectionName = FName("Pistol"); //same as pistol as they sound very similar
 				break;
 			case EWeaponType::EWT_Shotgun:
-				sectionName = FName("Rifle");
+				sectionName = FName("Shotgun");
 				break;
 			case EWeaponType::EWT_Sniper:
-				sectionName = FName("Rifle");
+				sectionName = FName("Sniper");
 				break;
 			case EWeaponType::EWT_GrenadeLauncher:
-				sectionName = FName("Rifle");
+				sectionName = FName("GrenadeLauncher");
 				break;
 		}
 
